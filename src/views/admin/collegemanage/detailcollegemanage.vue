@@ -5,16 +5,32 @@
         :model="data"
         :rules="rules"
         ref="checkFor"
-        label-width="100px"
+        label-width="120px"
         class="demo-ruleForm center"
         label-position="left"
       >
-        <el-form-item label="学校名称" prop="schoolName">
+        <el-form-item label="二级学院名称" prop="name">
           <el-input
-            v-model="data.schoolName"
+            v-model="data.name"
             class="input-width"
+            placeholder="请输入二级学院名称"
             clearable
           ></el-input>
+        </el-form-item>
+        <el-form-item label="请选择学校" prop="schoolId">
+          <el-select
+            class="select-width"
+            v-model="data.schoolId"
+            clearable
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in schooldata"
+              :key="item.id"
+              :label="item.schoolName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div class="cancel-width">
@@ -39,14 +55,31 @@
         class="demo-ruleForm center"
         label-position="left"
       >
-        <el-form-item label="学校名称">
-          <span v-if="isShowEdit == false">{{ data.schoolName }}</span>
+        <el-form-item label="二级学院名称">
+          <span v-if="isShowEdit == false">{{ data.name }}</span>
           <el-input
             v-else
-            v-model="data.schoolName"
+            v-model="data.name"
             class="input-width"
             clearable
           ></el-input>
+        </el-form-item>
+        <el-form-item label="学校名称">
+          <span v-if="isShowEdit == false">{{ data.schoolName }}</span>
+          <el-select
+            class="select-width"
+            v-model="data.schoolId"
+            clearable
+            v-else
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in schooldata"
+              :key="item.id"
+              :label="item.schoolName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="创建时间">
           <span v-if="isShowEdit == false">{{
@@ -79,31 +112,37 @@
   </div>
 </template>
 <script>
-import api from "./schoolmanageUrl";
+import api from "./collegemanageUrl";
 import util from "@/util/util";
 export default {
   data() {
     return {
       isShowEdit: false,
       data: {
+        name: "",
+        schoolId: "",
         schoolName: "",
         createDate: "",
         editDate: "",
         isDelete: "N",
       },
+      schooldata: "",
       params: {
         id: "",
         type: "",
       },
       rules: {
-        schoolName: [
-          { required: true, message: "校名不能为空", trigger: "blur" },
+        name: [
+          { required: true, message: "二级学院名不能为空", trigger: "blur" },
           {
             min: 1,
             max: 15,
             message: "长度在 1 到 15 个字符",
             trigger: "blur",
           },
+        ],
+        schoolId: [
+          { required: true, message: "请选择学校", trigger: "change" },
         ],
         createDate: [{ required: false, message: "", trigger: "blur" }],
         editDate: [{ required: false, message: "", trigger: "blur" }],
@@ -117,9 +156,10 @@ export default {
       this.params[i] = params[i];
     }
     this.getDetail();
+    this.getSchoolList();
   },
   methods: {
-    // 通过id获取school
+    // 通过id获取college
     getDetail() {
       if (this.params.id && this.params.id != null) {
         api.getDetail(this.params.id).then((res) => {
@@ -132,11 +172,22 @@ export default {
         return;
       }
     },
+    // 获取school list
+    getSchoolList() {
+      api.getSchoolList().then((res) => {
+        this.schooldata = res.data.data;
+      });
+    },
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          this.schooldata.forEach((e) => {
+            if ((this.data.schoolId = e.id)) {
+              this.data.schoolName = e.schoolName;
+            }
+          });
           // 校验通过 新增或编辑
-          api.updateSchool(this.data,this.params.type).then(
+          api.updateSchool(this.data, this.params.type).then(
             (res) => {
               if (res.data.code == 10000) {
                 this.$message.success(res.data.msg);
@@ -196,5 +247,9 @@ export default {
   width: 100%;
   text-align: left;
   padding: 10px 0;
+}
+.select-width {
+  width: 15%;
+  float: left;
 }
 </style>

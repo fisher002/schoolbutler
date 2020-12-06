@@ -5,13 +5,11 @@
         <my-top userType="123" @callBackBreak="callBackBreak"></my-top>
       </el-header>
       <el-container>
-        <el-aside :width="isHide ? '15px' : '200px'" class="left_side">
-          <el-button
-            type="primary"
-            style="width: 100%"
-            :icon="isHide ? 'el-icon-s-unfold' : 'el-icon-s-fold'"
-            @click="isHide = !isHide"
-          ></el-button>
+        <el-aside :width="isHide ? '30px' : '230px'" class="left_side">
+          <my-left></my-left>
+          <div class="right_btn" @click.stop="isHide = !isHide">
+            <i :class="isHide ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
+          </div>
         </el-aside>
         <el-main style="padding: 0 3px">
           <div class="bread_crumb">
@@ -33,9 +31,11 @@
 </template>
 <script>
 import top from "@/components/top";
+import left from "@/components/left";
 export default {
   components: {
     "my-top": top,
+    "my-left": left,
   },
   data() {
     return {
@@ -66,7 +66,6 @@ export default {
 </script>
 <style scoped lang="scss">
 .bread_crumb {
-  width: 100%;
   padding: 5px 0;
   font-size: 14px;
   display: flex;
@@ -76,9 +75,34 @@ export default {
   }
 }
 .left_side {
-  padding: 5px 3px;
+  margin: 5px 2px 8px;
+  padding: 0px 5px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
+  border-radius: 5px;
   width: auto;
   transition: width 1s;
   overflow: hidden;
+  position: relative;
+}
+.left_side:hover .right_btn {
+  opacity: 1;
+}
+.el-divider--vertical {
+  margin: 5px 8px !important;
+  height: auto !important;
+}
+.right_btn {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  z-index: 9999;
+  background: #dcdcdc;
+  cursor: pointer;
+  line-height: 30px;
+  opacity: 0;
+  transition: opacity 1s;
 }
 </style>

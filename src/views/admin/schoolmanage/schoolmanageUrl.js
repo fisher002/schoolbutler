@@ -1,6 +1,6 @@
 import axios from '@/axios/axios'
 const baseUrl = '/api'
-const url = '/ac'
+const url = '/ac/school'
 
 export default {
     getList(param) {
@@ -16,9 +16,9 @@ export default {
             method: 'get'
         })
     },
-    updateSchool(param) {
+    updateSchool(param,type) {
         return axios({
-            url: `${baseUrl}${url}/add`,
+            url: type === 'add' ? `${baseUrl}${url}/add` : `${baseUrl}${url}/edit`,
             method: 'post',
             data: param
         })

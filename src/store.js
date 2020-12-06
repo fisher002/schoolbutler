@@ -3,10 +3,14 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
+const initState = {
+  access_token: '',
+  indexBreakData: []
+}
+
 export default new Vuex.Store({
   // state是唯一公共数据源，所有共享数据都要统一放到store的state中进行储存
   state: {
-    count: 0,
     access_token: '',
     indexBreakData: []
   },
@@ -16,14 +20,21 @@ export default new Vuex.Store({
    * 第二种：import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
    */
   mutations: {
-    setToken(state,step) {
+    setToken(state, step) {
       state.access_token = step;
     },
-    setIndexBreakData(state,step) { // 往面包屑数据 indexBreakData 追加数据
+    setIndexBreakData(state, step) { // 往面包屑数据 indexBreakData 追加数据
       state.indexBreakData.push(...step);
     },
     clearIndexBreakData(state) { // 清除面包屑 indexBreakData
       state.indexBreakData = [];
+    },
+    resetState(state) { // 初始化state中的所有数据
+      /*
+       * 注：如果目标对象与源对象有同名属性，或多个源对象有同名属性，则后面的属性会覆盖前面的属性
+       * Object.assign方法用来将源对象（source）的所有可枚举属性，复制到目标对象（target）。
+       */
+      Object.assign(state, initState);
     }
   },
   // actions允许异步执行 setTimeout等

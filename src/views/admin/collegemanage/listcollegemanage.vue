@@ -4,8 +4,14 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入校名"
+            placeholder="请输入学校名"
             v-model="params.schoolName"
+            clearable
+          ></el-input>
+          <div style="width: 10px"></div>
+          <el-input
+            placeholder="请输入二级学院名"
+            v-model="params.name"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -59,6 +65,13 @@
             align="center"
             label="序号"
             width="50"
+          ></el-table-column>
+          <el-table-column
+            prop="name"
+            align="center"
+            sortable
+            label="二级学院名称"
+            width="200"
           ></el-table-column>
           <el-table-column
             prop="schoolName"
@@ -137,7 +150,7 @@
   </div>
 </template>
 <script>
-import api from "./schoolmanageUrl";
+import api from "./collegemanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -148,7 +161,9 @@ export default {
       data: "",
       selectionData: "",
       params: {
+        name: "",
         schoolName: "",
+        schoolId: "",
       },
     };
   },
@@ -184,7 +199,7 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailschoolmanage",
+        path: "/admin/detailcollegemanage",
         query: {
           id: res,
           type: type,

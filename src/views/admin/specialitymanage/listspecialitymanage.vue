@@ -4,8 +4,14 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入校名"
-            v-model="params.schoolName"
+            placeholder="请输入专业名"
+            v-model="params.name"
+            clearable
+          ></el-input>
+          <div style="width: 10px"></div>
+          <el-input
+            placeholder="请输入二级学院名"
+            v-model="params.collegeName"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -61,10 +67,17 @@
             width="50"
           ></el-table-column>
           <el-table-column
-            prop="schoolName"
+            prop="name"
             align="center"
             sortable
-            label="学校名称"
+            label="专业名称"
+            width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="collegeName"
+            align="center"
+            sortable
+            label="二级学院名称"
             width="200"
           ></el-table-column>
           <el-table-column
@@ -137,7 +150,7 @@
   </div>
 </template>
 <script>
-import api from "./schoolmanageUrl";
+import api from "./specialitymanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -148,7 +161,9 @@ export default {
       data: "",
       selectionData: "",
       params: {
-        schoolName: "",
+        name: "",
+        collegeName: "",
+        collegeId: "",
       },
     };
   },
@@ -184,7 +199,7 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailschoolmanage",
+        path: "/admin/detailspecialitymanage",
         query: {
           id: res,
           type: type,
@@ -215,7 +230,7 @@ export default {
         center: true,
       })
         .then(() => {
-          api.deleteSchool({ id: res }).then(
+          api.delete({ id: res }).then(
             (res) => {
               if (res.data.code == 10000) {
                 this.$message.success(res.data.msg);
