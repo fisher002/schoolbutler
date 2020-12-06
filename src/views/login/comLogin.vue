@@ -11,7 +11,17 @@
         <p class="left_date left_font">截止时间：{{ proData.pro_end_date }}</p>
       </div>
       <div class="right_login_form">
-        <div class="form_tabs">账号密码登录</div>
+        <div class="form_tabs">
+          <p>
+            请选择登录类型,当前[
+            <font color="red">{{
+              loginType === "admin" ? "管理员" : "教师"
+            }}</font>
+            ]
+          </p>
+          <el-radio v-model="loginType" label="admin">管理员</el-radio>
+          <el-radio v-model="loginType" label="teacher">教师</el-radio>
+        </div>
         <div class="form_input">
           <div class="form_input_item">
             <el-input
@@ -55,6 +65,7 @@ export default {
       height: 0,
       width: 0,
       activeName: "user",
+      loginType: "admin",
       userData: {
         username: "",
         password: "",
@@ -87,17 +98,22 @@ export default {
       if (this.userData.username === "" || this.userData.password === "") {
         return this.$message.error("账号或密码不能为空");
       }
-      this.setToken("f5f5f5f5f5ggga546");
-      let mdata = {
-        username: this.userData.username,
-        password: this.$md5(this.userData.password),
-      };
-      api.checkLogin(mdata).then(
+      api.checkLogin(this.userData, this.loginType).then(
         (res) => {
-          console.log(res);
+          if (res.data.code == 10000) {
+            this.setToken(res.data.data.token);
+            sessionStorage.setItem("user_type", this.loginType);
+            this.$router.replace({
+              path: "/index",
+            });
+            this.$message.success(res.data.msg);
+          }
+          if (res.data.code != 10000) {
+            this.$message.error(res.data.msg);
+          }
         },
         (err) => {
-          console.log(err);
+          this.$message.error(err.data.msg);
         }
       );
     },
@@ -105,6 +121,7 @@ export default {
     setToken(token) {
       this.$store.commit("setToken", token);
       sessionStorage.setItem("token", this.$store.getters.getToken);
+      sessionStorage.setItem("isLogin",true);
     },
   },
 };

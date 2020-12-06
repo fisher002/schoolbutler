@@ -1,13 +1,13 @@
-import axios from 'axios'
+import axios from '@/axios/axios'
 const baseUrl = '/api'
 const url = '/am'
 
 export default {
-  checkLogin(params) {
+  checkLogin(params,type) {
     return axios({
-      url: `${baseUrl}${url}/login`,
+      url: type === 'admin' ? `${baseUrl}/adminLogin` : `${baseUrl}/teacherLogin`,
       method: 'post',
-      params: params
+      data: params
     })
   }
 }
