@@ -4,14 +4,14 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入校区名"
-            v-model="params.schoolName"
+            placeholder="请输入班级名"
+            v-model="params.name"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
           <el-input
             placeholder="请输入二级学院名"
-            v-model="params.name"
+            v-model="params.collegeName"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -70,25 +70,39 @@
             prop="name"
             align="center"
             sortable
-            label="二级学院名称"
+            label="班级名称"
             width="200"
           ></el-table-column>
           <el-table-column
             prop="schoolName"
             align="center"
             sortable
-            label="校区名称"
+            label="校区"
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="createDate"
+            prop="collegeName"
             align="center"
             sortable
-            label="注册时间"
+            label="二级学院名称"
             width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="specialityName"
+            align="center"
+            sortable
+            label="专业名称"
+            width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="grade"
+            align="center"
+            sortable
+            label="年级"
+            width="100"
           >
             <template slot-scope="scope">
-              <span>{{ formatDate(scope.row.createDate) }}</span>
+              <span>{{ formatGrade(scope.row.grade) }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -150,7 +164,7 @@
   </div>
 </template>
 <script>
-import api from "./collegemanageUrl";
+import api from "./studentclassmanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -162,8 +176,11 @@ export default {
       selectionData: "",
       params: {
         name: "",
-        schoolName: "",
-        schoolId: "",
+        specialityId: "",
+        specialityName: "",
+        collegeName: "",
+        collegeId: "",
+        grade: "",
       },
     };
   },
@@ -199,7 +216,7 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailcollegemanage",
+        path: "/admin/detailstudentclassmanage",
         query: {
           id: res,
           type: type,
@@ -230,7 +247,7 @@ export default {
         center: true,
       })
         .then(() => {
-          api.deleteSchool({ id: res }).then(
+          api.delete({ id: res }).then(
             (res) => {
               if (res.data.code == 10000) {
                 this.$message.success(res.data.msg);
@@ -260,6 +277,10 @@ export default {
     // 日期格式化
     formatDate(res) {
       return comm.formatDateV1(res);
+    },
+    // 年级格式化
+    formatGrade(res) {
+      return comm.formatGrade(res);
     },
   },
 };

@@ -2,12 +2,8 @@ const menuData = [{
     name: 'basedata',
     label: '基础数据',
     children: [{
-      name: 'adminmanage',
-      label: '管理员管理',
-      path: '/admin/adminmanage'
-    }, {
       name: 'schoolmanage',
-      label: '学校管理',
+      label: '校区管理',
       path: '/admin/schoolmanage'
     }, {
       name: 'collegemanage',
@@ -17,6 +13,21 @@ const menuData = [{
       name: 'specialitymanage',
       label: '专业管理',
       path: '/admin/specialitymanage'
+    },
+    {
+      name: 'subjectmanage',
+      label: '学科管理',
+      path: '/admin/subjectmanage'
+    },
+    {
+      name: 'studentclassmanage',
+      label: '班级管理',
+      path: '/admin/studentclassmanage'
+    },
+    {
+      name: 'studentmanage',
+      label: '学生管理',
+      path: '/admin/studentmanage'
     }]
   }, {
     name: 'teacherdata',
@@ -28,9 +39,25 @@ const menuData = [{
     }]
   },
   {
-    name: 'basetest1',
-    label: '测试菜单1',
-    path: '/admin/testmanage1',
+    name: 'coursemanage',
+    label: '课程管理',
+    children: [
+      {
+        name: 'coursemanage',
+        label: '基础课程',
+        path: '/admin/coursemanage'
+      },
+      {
+        name: 'coursearrangemanage',
+        label: '课程安排',
+        path: '/admin/coursearrangemanage'
+      }
+    ]
+  },
+  {
+    name: 'classroommanage',
+    label: '教室管理',
+    path: '/admin/classroommanage'
   }
 ]
 

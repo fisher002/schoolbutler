@@ -9,11 +9,11 @@
         class="demo-ruleForm center"
         label-position="left"
       >
-        <el-form-item label="二级学院名称" prop="name">
+        <el-form-item label="班级名称" prop="name">
           <el-input
             v-model="data.name"
             class="input-width"
-            placeholder="请输入二级学院名称"
+            placeholder="请输入班级名称"
             clearable
           ></el-input>
         </el-form-item>
@@ -23,6 +23,7 @@
             v-model="data.schoolId"
             clearable
             placeholder="请选择"
+            @change="handleSchool"
           >
             <el-option
               v-for="item in schooldata"
@@ -30,6 +31,59 @@
               :label="item.schoolName"
               :value="item.id"
             ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item
+          label="请选择二级学院"
+          prop="collegeId"
+          v-if="data.schoolId"
+        >
+          <el-select
+            class="select-width"
+            v-model="data.collegeId"
+            clearable
+            placeholder="请选择"
+            @change="handleCollege"
+          >
+            <el-option
+              v-for="item in collegedata"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item
+          label="请选择所属专业"
+          prop="specialityId"
+          v-if="data.collegeId"
+        >
+          <el-select
+            class="select-width"
+            v-model="data.specialityId"
+            clearable
+            placeholder="请选择"
+            @change="handleSpeciality"
+          >
+            <el-option
+              v-for="item in specialitydata"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="请选择年级" prop="grade">
+          <el-select
+            class="select-width"
+            v-model="data.grade"
+            clearable
+            placeholder="请选择"
+          >
+            <el-option label="大一" :value="1"></el-option>
+            <el-option label="大二" :value="2"></el-option>
+            <el-option label="大三" :value="3"></el-option>
+            <el-option label="大四" :value="4"></el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -55,7 +109,7 @@
         class="demo-ruleForm center"
         label-position="left"
       >
-        <el-form-item label="二级学院名称">
+        <el-form-item label="班级名称">
           <span v-if="isShowEdit == false">{{ data.name }}</span>
           <el-input
             v-else
@@ -64,38 +118,33 @@
             clearable
           ></el-input>
         </el-form-item>
-        <el-form-item label="校区名称">
-          <span v-if="isShowEdit == false">{{ data.schoolName }}</span>
+        <el-form-item label="校区" prop="schoolId">
+          <span>{{ data.schoolName }}</span>
+        </el-form-item>
+        <el-form-item label="二级学院">
+          <span>{{ data.collegeName }}</span>
+        </el-form-item>
+        <el-form-item
+          label="所属专业"
+          prop="specialityId"
+          v-if="data.collegeId"
+        >
+          <span>{{ data.specialityName }}</span>
+        </el-form-item>
+        <el-form-item label="年级" prop="grade">
+          <span v-if="isShowEdit == false">{{ formatGrade(data.grade) }}</span>
           <el-select
             class="select-width"
-            v-model="data.schoolId"
+            v-model="data.grade"
             clearable
             v-else
             placeholder="请选择"
           >
-            <el-option
-              v-for="item in schooldata"
-              :key="item.id"
-              :label="item.schoolName"
-              :value="item.id"
-            ></el-option>
+            <el-option label="大一" :value="1"></el-option>
+            <el-option label="大二" :value="2"></el-option>
+            <el-option label="大三" :value="3"></el-option>
+            <el-option label="大四" :value="4"></el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span v-if="isShowEdit == false">{{
-            formatDate(data.createDate)
-          }}</span>
-          <el-col :span="11" v-else>
-            <el-form-item prop="registerTime">
-              <el-date-picker
-                class="input-width"
-                type="date"
-                placeholder="选择日期"
-                clearable
-                v-model="data.createDate"
-              ></el-date-picker>
-            </el-form-item>
-          </el-col>
         </el-form-item>
       </el-form>
       <div class="cancel-width">
@@ -112,7 +161,7 @@
   </div>
 </template>
 <script>
-import api from "./collegemanageUrl";
+import api from "./studentclassmanageUrl";
 import util from "@/util/util";
 export default {
   data() {
@@ -122,18 +171,25 @@ export default {
         name: "",
         schoolId: "",
         schoolName: "",
+        collegeId: "",
+        collegeName: "",
+        specialityId: "",
+        specialityName: "",
+        grade: "",
         createDate: "",
         editDate: "",
         isDelete: "N",
       },
-      schooldata: "",
+      schooldata: [],
+      collegedata: [],
+      specialitydata: [],
       params: {
         id: "",
         type: "",
       },
       rules: {
         name: [
-          { required: true, message: "二级学院名不能为空", trigger: "blur" },
+          { required: true, message: "专业名不能为空", trigger: "blur" },
           {
             min: 1,
             max: 15,
@@ -142,8 +198,15 @@ export default {
           },
         ],
         schoolId: [
-          { required: true, message: "请选择校区", trigger: "change" },
+          { required: true, message: "请选择学校", trigger: "change" },
         ],
+        collegeId: [
+          { required: true, message: "请选择二级学院", trigger: "change" },
+        ],
+        specialityId: [
+          { required: true, message: "请选择专业", trigger: "change" },
+        ],
+        grade: [{ required: true, message: "请选择年级", trigger: "change" }],
         createDate: [{ required: false, message: "", trigger: "blur" }],
         editDate: [{ required: false, message: "", trigger: "blur" }],
       },
@@ -181,13 +244,8 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.schooldata.forEach((e) => {
-            if ((this.data.schoolId = e.id)) {
-              this.data.schoolName = e.schoolName;
-            }
-          });
           // 校验通过 新增或编辑
-          api.updateSchool(this.data, this.params.type).then(
+          api.update(this.data, this.params.type).then(
             (res) => {
               if (res.data.code == 10000) {
                 this.$message.success(res.data.msg);
@@ -202,6 +260,37 @@ export default {
           );
         }
       });
+    },
+    // 选择校区后
+    handleSchool(res) {
+      if (res) {
+        this.data.schoolName = this.schooldata.find(
+          (it) => it.id == this.data.schoolId
+        ).schoolName;
+        // 获取二级学院
+        api.getCollegeList({ schoolId: res }).then((res) => {
+          this.collegedata = res.data.data;
+        });
+      }
+    },
+    // 选择二级学院后
+    handleCollege(res) {
+      if (res) {
+        this.data.collegeName = this.collegedata.find(
+          (it) => it.id == this.data.collegeId
+        ).name;
+        // 获取专业
+        api.getSpecialityList({ collegeId: res }).then((res) => {
+          this.specialitydata = res.data.data;
+        });
+      }
+    },
+    // 选择专业后
+    handleSpeciality(res) {
+      if (res)
+        this.data.specialityName = this.specialitydata.find(
+          (it) => it.id == res
+        ).name;
     },
     // 重置表单
     resetForm(formName) {
@@ -224,6 +313,10 @@ export default {
     // 日期格式化
     formatDate(res) {
       return util.formatDate(res);
+    },
+    // 年级格式化
+    formatGrade(res) {
+      return util.formatGrade(res);
     },
   },
 };

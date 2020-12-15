@@ -4,7 +4,7 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入校名"
+            placeholder="请输入校区名"
             v-model="params.schoolName"
             clearable
           ></el-input>
@@ -64,7 +64,7 @@
             prop="schoolName"
             align="center"
             sortable
-            label="学校名称"
+            label="校区名称"
             width="200"
           ></el-table-column>
           <el-table-column

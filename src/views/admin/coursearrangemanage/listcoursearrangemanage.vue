@@ -4,14 +4,14 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入校区名"
-            v-model="params.schoolName"
+            placeholder="请输入课程名称"
+            v-model="params.courseName"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
           <el-input
-            placeholder="请输入二级学院名"
-            v-model="params.name"
+            placeholder="请输入班级名称"
+            v-model="params.className"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -48,7 +48,7 @@
       <div>
         <el-table
           v-loading="loading"
-          :data="data.data"
+          :data="data.list"
           tooltip-effect="dark"
           border
           style="width: 100%"
@@ -67,39 +67,64 @@
             width="50"
           ></el-table-column>
           <el-table-column
-            prop="name"
+            prop="courseName"
             align="center"
             sortable
-            label="二级学院名称"
+            label="课程"
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="schoolName"
+            prop="specialityName"
             align="center"
             sortable
-            label="校区名称"
+            label="专业"
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="createDate"
+            prop="classRoomName"
             align="center"
             sortable
-            label="注册时间"
+            label="上课地点"
             width="200"
           >
             <template slot-scope="scope">
-              <span>{{ formatDate(scope.row.createDate) }}</span>
+              <span>{{ `${scope.row.areaName}-${scope.row.classRoomName}` }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="className"
+            align="center"
+            sortable
+            label="班级"
+            width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="teacherName"
+            align="center"
+            sortable
+            label="教师"
+            width="150"
+          ></el-table-column>
+          <el-table-column
+            prop="editDate"
+            align="center"
+            sortable
+            label="开始时间"
+            width="150"
+          >
+            <template slot-scope="scope">
+              <span>{{ formatDate(scope.row.startClassDate) }}</span>
             </template>
           </el-table-column>
           <el-table-column
             prop="editDate"
             align="center"
             sortable
-            label="编辑时间"
-            width="200"
+            label="结束时间"
+            width="150"
           >
             <template slot-scope="scope">
-              <span>{{ formatDate(scope.row.editDate) }}</span>
+              <span>{{ formatDate(scope.row.endClassDate) }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -107,7 +132,7 @@
             align="center"
             sortable
             label="状态"
-            width="150"
+            width="100"
           >
             <template slot-scope="scope">
               <span
@@ -140,17 +165,20 @@
       <div class="page-number">
         <el-pagination
           background
-          @current-change="pageNumberChange"
-          :current-page="params.pageNumber"
-          layout="total, prev, pager, next, jumper"
-          :total="data.data ? data.data.length : 0"
+          @current-change="pageNumChange"
+          @size-change="pageSizeChange"
+          :current-page="params.pageNum"
+          :page-sizes="[10, 20, 30, 50]"
+          :page-size="params.pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="data.total ? data.total : 0"
         ></el-pagination>
       </div>
     </div>
   </div>
 </template>
 <script>
-import api from "./collegemanageUrl";
+import api from "./coursearrangemanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -162,8 +190,12 @@ export default {
       selectionData: "",
       params: {
         name: "",
-        schoolName: "",
-        schoolId: "",
+        classId: "",
+        className: "",
+        courseName: "",
+        pageNum: 1,
+        pageSize: 10,
+        isDesc: "",
       },
     };
   },
@@ -174,12 +206,12 @@ export default {
     // 获取列表
     getList() {
       this.loading = true;
-      api.getList(this.params).then(
+      api.getPageList(this.checkParams(this.params)).then(
         (res) => {
           if (res.data.code == 10000) {
             this.loading = false;
             this.$message.success(res.data.msg);
-            this.data = res.data;
+            this.data = res.data.data;
             return;
           }
           this.loading = false;
@@ -199,7 +231,7 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailcollegemanage",
+        path: "/admin/detailcoursearrangemanage",
         query: {
           id: res,
           type: type,
@@ -230,7 +262,7 @@ export default {
         center: true,
       })
         .then(() => {
-          api.deleteSchool({ id: res }).then(
+          api.delete({ id: res }).then(
             (res) => {
               if (res.data.code == 10000) {
                 this.$message.success(res.data.msg);
@@ -250,17 +282,22 @@ export default {
         });
     },
     // 页码改变
-    pageNumberChange(res) {
-      // if (this.data.total <= 10) {
-      //   return;
-      // }
-      // this.params.pageNumber = res - 1;
-      // this.getList();
+    pageNumChange(res) {
+      if (this.data.total <= 10) {
+        return;
+      }
+      this.params.pageNum = res;
+      this.getList();
     },
-    // 日期格式化
-    formatDate(res) {
-      return comm.formatDateV1(res);
+    // 页数改变
+    pageSizeChange(res) {
+      this.params.pageSize = res;
+      if (this.data.total <= 10) {
+        return;
+      }
+      this.getList();
     },
+    ...comm,
   },
 };
 </script>

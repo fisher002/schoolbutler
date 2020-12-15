@@ -4,14 +4,8 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入校区名"
-            v-model="params.schoolName"
-            clearable
-          ></el-input>
-          <div style="width: 10px"></div>
-          <el-input
-            placeholder="请输入二级学院名"
-            v-model="params.name"
+            placeholder="请输入位置名称"
+            v-model="params.areaName"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -48,7 +42,7 @@
       <div>
         <el-table
           v-loading="loading"
-          :data="data.data"
+          :data="data.list"
           tooltip-effect="dark"
           border
           style="width: 100%"
@@ -70,36 +64,32 @@
             prop="name"
             align="center"
             sortable
-            label="二级学院名称"
-            width="200"
+            label="教室名称"
+            width="100"
           ></el-table-column>
           <el-table-column
             prop="schoolName"
             align="center"
             sortable
-            label="校区名称"
+            label="校区"
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="createDate"
+            prop="areaName"
             align="center"
             sortable
-            label="注册时间"
+            label="位置"
             width="200"
-          >
-            <template slot-scope="scope">
-              <span>{{ formatDate(scope.row.createDate) }}</span>
-            </template>
-          </el-table-column>
+          ></el-table-column>
           <el-table-column
             prop="editDate"
             align="center"
             sortable
             label="编辑时间"
-            width="200"
+            width="150"
           >
             <template slot-scope="scope">
-              <span>{{ formatDate(scope.row.editDate) }}</span>
+              <span>{{ formatDateV1(scope.row.editDate) }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -107,7 +97,7 @@
             align="center"
             sortable
             label="状态"
-            width="150"
+            width="100"
           >
             <template slot-scope="scope">
               <span
@@ -140,17 +130,20 @@
       <div class="page-number">
         <el-pagination
           background
-          @current-change="pageNumberChange"
-          :current-page="params.pageNumber"
-          layout="total, prev, pager, next, jumper"
-          :total="data.data ? data.data.length : 0"
+          @current-change="pageNumChange"
+          @size-change="pageSizeChange"
+          :current-page="params.pageNum"
+          :page-sizes="[10, 20, 30, 50]"
+          :page-size="params.pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="data.total ? data.total : 0"
         ></el-pagination>
       </div>
     </div>
   </div>
 </template>
 <script>
-import api from "./collegemanageUrl";
+import api from "./classroommanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -162,8 +155,12 @@ export default {
       selectionData: "",
       params: {
         name: "",
-        schoolName: "",
-        schoolId: "",
+        classId: "",
+        className: "",
+        areaName: "",
+        pageNum: 1,
+        pageSize: 10,
+        isDesc: "",
       },
     };
   },
@@ -174,12 +171,12 @@ export default {
     // 获取列表
     getList() {
       this.loading = true;
-      api.getList(this.params).then(
+      api.getPageList(this.checkParams(this.params)).then(
         (res) => {
           if (res.data.code == 10000) {
             this.loading = false;
             this.$message.success(res.data.msg);
-            this.data = res.data;
+            this.data = res.data.data;
             return;
           }
           this.loading = false;
@@ -199,7 +196,7 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailcollegemanage",
+        path: "/admin/detailclassroommanage",
         query: {
           id: res,
           type: type,
@@ -230,7 +227,7 @@ export default {
         center: true,
       })
         .then(() => {
-          api.deleteSchool({ id: res }).then(
+          api.delete({ id: res }).then(
             (res) => {
               if (res.data.code == 10000) {
                 this.$message.success(res.data.msg);
@@ -250,17 +247,22 @@ export default {
         });
     },
     // 页码改变
-    pageNumberChange(res) {
-      // if (this.data.total <= 10) {
-      //   return;
-      // }
-      // this.params.pageNumber = res - 1;
-      // this.getList();
+    pageNumChange(res) {
+      if (this.data.total <= 10) {
+        return;
+      }
+      this.params.pageNum = res;
+      this.getList();
     },
-    // 日期格式化
-    formatDate(res) {
-      return comm.formatDateV1(res);
+    // 页数改变
+    pageSizeChange(res) {
+      this.params.pageSize = res;
+      if (this.data.total <= 10) {
+        return;
+      }
+      this.getList();
     },
+    ...comm,
   },
 };
 </script>

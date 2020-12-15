@@ -9,7 +9,7 @@
         class="demo-ruleForm center"
         label-position="left"
       >
-        <el-form-item label="学校名称" prop="schoolName">
+        <el-form-item label="校区名称" prop="schoolName">
           <el-input
             v-model="data.schoolName"
             class="input-width"
@@ -39,7 +39,7 @@
         class="demo-ruleForm center"
         label-position="left"
       >
-        <el-form-item label="学校名称">
+        <el-form-item label="校区名称">
           <span v-if="isShowEdit == false">{{ data.schoolName }}</span>
           <el-input
             v-else

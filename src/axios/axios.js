@@ -1,5 +1,6 @@
 import axios from 'axios'
 import util from '../util/util'
+import store from '../store'
 // 引入element-ui的弹出信息
 import {
   Message
@@ -41,33 +42,32 @@ axios.interceptors.request.use(config => {
  * 返回拦截，可以重新渲染数据
  */
 axios.interceptors.response.use(response => {
+  // token失效处理，强制用户返回登录页面 根据状态码判断
+  if (response.data.code == 4) {
+    Message({
+      message: '登录已失效，即将返回登录页面',
+      type: 'error',
+      duration: 1000
+    })
+    setTimeout(() => {
+      //回退至登录页面
+      sessionStorage.clear();
+      store.commit('resetState');
+      router.replace('/');
+    }, 2000)
+  }
   return response;
 }, error => {
   if (error.response) {
     /**
      * 在这里：可以根据业务需求可以在请求失败后做什么。
      * 根据请求失败的http状态码去给用户相应的提示
-     * token失效处理
      */
     let tips = error.response.status in httpCode ? httpCode[error.response.status] : error.response.data.message;
     Message({
       message: tips,
       type: 'error'
     })
-    // token失效处理，强制用户返回登录页面 根据状态码判断
-    let flag;
-    if (error.response.status == 202) {
-      Message({
-        message: '登录已失效，即将返回登录页面',
-        type: 'error',
-        duration: 1000
-      })
-      setTimeout(() => {
-        //回退至登录页面
-        router.replace('/');
-        sessionStorage.clear();
-      }, 2000)
-    }
     return Promise.reject(error);
   } else {
     Message({

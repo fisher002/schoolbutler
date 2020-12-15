@@ -7,6 +7,20 @@ import listcollegemanage from '@/views/admin/collegemanage/listcollegemanage'
 import detailcollegemanage from '@/views/admin/collegemanage/detailcollegemanage'
 import listspecialitymanage from '@/views/admin/specialitymanage/listspecialitymanage'
 import detailspecialitymanage from '@/views/admin/specialitymanage/detailspecialitymanage'
+import liststudentclassmanage from '@/views/admin/studentclassmanage/liststudentclassmanage'
+import detailstudentclassmanage from '@/views/admin/studentclassmanage/detailstudentclassmanage'
+import liststudentmanage from '@/views/admin/studentmanage/liststudentmanage'
+import detailstudentmanage from '@/views/admin/studentmanage/detailstudentmanage'
+import listteachermanage from '@/views/admin/teachermanage/listteachermanage'
+import detailteachermanage from '@/views/admin/teachermanage/detailteachermanage'
+import listsubjectmanage from '@/views/admin/subjectmanage/listsubjectmanage'
+import detailsubjectmanage from '@/views/admin/subjectmanage/detailsubjectmanage'
+import listcoursemanage from '@/views/admin/coursemanage/listcoursemanage'
+import detailcoursemanage from '@/views/admin/coursemanage/detailcoursemanage'
+import listclassroommanage from '@/views/admin/classroommanage/listclassroommanage'
+import detailclassroommanage from '@/views/admin/classroommanage/detailclassroommanage'
+import listcoursearrangemanage from '@/views/admin/coursearrangemanage/listcoursearrangemanage'
+import detailcoursearrangemanage from '@/views/admin/coursearrangemanage/detailcoursearrangemanage'
 
 
 export default [{
@@ -53,5 +67,75 @@ export default [{
     path: '/admin/detailspecialitymanage',
     name: 'detailspecialitymanage',
     component: detailspecialitymanage,
+  },
+  {
+    path: '/admin/studentclassmanage',
+    name: 'studentclassmanage',
+    component: liststudentclassmanage,
+  },
+  {
+    path: '/admin/detailstudentclassmanage',
+    name: 'detailstudentclassmanage',
+    component: detailstudentclassmanage,
+  },
+  {
+    path: '/admin/studentmanage',
+    name: 'studentmanage',
+    component: liststudentmanage,
+  },
+  {
+    path: '/admin/detailstudentmanage',
+    name: 'detailstudentmanage',
+    component: detailstudentmanage,
+  },
+  {
+    path: '/admin/teachermanage',
+    name: 'teachermanage',
+    component: listteachermanage,
+  },
+  {
+    path: '/admin/detailteachermanage',
+    name: 'detailteachermanage',
+    component: detailteachermanage,
+  },
+  {
+    path: '/admin/subjectmanage',
+    name: 'subjectmanage',
+    component: listsubjectmanage,
+  },
+  {
+    path: '/admin/detailsubjectmanage',
+    name: 'detailsubjectmanage',
+    component: detailsubjectmanage,
+  },
+  {
+    path: '/admin/coursemanage',
+    name: 'coursemanage',
+    component: listcoursemanage,
+  },
+  {
+    path: '/admin/detailcoursemanage',
+    name: 'detailcoursemanage',
+    component: detailcoursemanage,
+  },
+  {
+    path: '/admin/classroommanage',
+    name: 'classroommanage',
+    component: listclassroommanage,
+  },
+  {
+    path: '/admin/detailclassroommanage',
+    name: 'detailclassroommanage',
+    component: detailclassroommanage,
+  },
+  {
+    path: '/admin/coursearrangemanage',
+    name: 'coursearrangemanage',
+    component: listcoursearrangemanage,
+  },
+  {
+    path: '/admin/detailcoursearrangemanage',
+    name: 'detailcoursearrangemanage',
+    component: detailcoursearrangemanage,
   }
 ]

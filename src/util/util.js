@@ -54,14 +54,43 @@ export default {
   /**对应星期几 */
   getRightDay(date) {
     let week = {
-        0: '星期日',
-        1: '星期一',
-        2: '星期二',
-        3: '星期三',
-        4: '星期四',
-        5: '星期五',
-        6: '星期六'
+      0: '星期日',
+      1: '星期一',
+      2: '星期二',
+      3: '星期三',
+      4: '星期四',
+      5: '星期五',
+      6: '星期六'
     };
     return week[date.getDay()];
-  }
+  },
+  /**年级格式化 */
+  formatGrade(res) {
+    let grade = {
+      1: '大一',
+      2: '大二',
+      3: '大三',
+      4: '大四'
+    }
+    return grade[res];
+  },
+  /**性别回馈 */
+  formatSex(res) {
+    return res === 'M' ? '男生' : '女生';
+  },
+  /**参数筛选，为空则不传 */
+  checkParams(val) {
+    let params = {};
+    for (let i in val) {
+      if (typeof (val[i]) === "number" && val[i] != null) {
+        params[i] = val[i];
+      }
+      if (typeof (val[i]) === "string") {
+        if (val[i].split(" ").join("").length > 0) {
+          params[i] = val[i];
+        }
+      }
+    }
+    return params;
+  },
 }
