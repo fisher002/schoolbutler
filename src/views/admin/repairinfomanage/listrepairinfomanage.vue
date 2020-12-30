@@ -4,8 +4,8 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入场地名称"
-            v-model="params.areaName"
+            placeholder="请输入学生名"
+            v-model="params.name"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -34,6 +34,7 @@
             type="primary"
             icon="el-icon-circle-plus-outline"
             @click="toDetail(null, 'add')"
+            disabled
             >新增</el-button
           >
         </div>
@@ -61,10 +62,10 @@
             width="50"
           ></el-table-column>
           <el-table-column
-            prop="name"
+            prop="studentName"
             align="center"
             sortable
-            label="教室名称"
+            label="学生"
             width="100"
           ></el-table-column>
           <el-table-column
@@ -78,22 +79,45 @@
             prop="areaName"
             align="center"
             sortable
-            label="场地"
-            width="200"
-          ></el-table-column>
-          <el-table-column
-            prop="editDate"
-            align="center"
-            sortable
-            label="编辑时间"
+            label="报修场地"
             width="150"
           >
             <template slot-scope="scope">
-              <span>{{ formatDateV1(scope.row.editDate) }}</span>
+              <span>{{ `${scope.row.areaName.substr(0, 20)}...` }}</span>
             </template>
           </el-table-column>
           <el-table-column
-            prop="isDelete"
+            prop="detailArea"
+            align="center"
+            sortable
+            label="详细地点"
+            width="250"
+          >
+            <template slot-scope="scope">
+              <span>{{ `${scope.row.detailArea.substr(0, 20)}...` }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="reason"
+            align="center"
+            sortable
+            label="报修原因"
+            width="300"
+          >
+            <template slot-scope="scope">
+              <span>{{ `${scope.row.reason.substr(0, 30)}...` }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="createDate"
+            align="center"
+            sortable
+            label="报修时间"
+            width="180"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="status"
             align="center"
             sortable
             label="状态"
@@ -102,16 +126,16 @@
             <template slot-scope="scope">
               <span
                 :style="{
-                  color: scope.row.isDelete == 'N' ? '#1fca1f' : 'red',
+                  color: scope.row.isHandle === 'Y' ? '#1fca1f' : 'red',
                 }"
-                >{{ scope.row.isDelete == "N" ? "可用" : "审核中" }}</span
-              >
-            </template>
+                >{{ scope.row.status }}</span
+              ></template
+            >
           </el-table-column>
           <el-table-column fixed="right" label="操作" min-width="20">
             <template slot-scope="scope">
               <el-button
-                @click="toDetail(scope.row.id, 'detail')"
+                @click="toDetail(scope.row, 'detail')"
                 type="text"
                 size="small"
                 >查看</el-button
@@ -140,10 +164,50 @@
         ></el-pagination>
       </div>
     </div>
+    <el-dialog
+      title="学生打卡详情"
+      :visible.sync="isShowDialog"
+      width="30%"
+      center
+    >
+      <el-form :model="detail">
+        <el-form-item label="报修学生">
+          <span>{{ detail.studentName }}</span>
+        </el-form-item>
+        <el-form-item label="所在校区">
+          <span>{{ detail.schoolName }}</span>
+        </el-form-item>
+        <el-form-item label="报修场地">
+          <span>{{ detail.areaName }}</span>
+        </el-form-item>
+        <el-form-item label="详细地点">
+          <span>{{ detail.detailArea }}</span>
+        </el-form-item>
+        <el-form-item label="报修原因">
+          <span>{{ detail.reason || "无" }}</span>
+        </el-form-item>
+        <el-form-item label="联系方式">
+          <span>{{ detail.phone }}</span>
+        </el-form-item>
+        <el-form-item label="申请时间">
+          <span>{{ detail.createDate }}</span>
+        </el-form-item>
+        <el-form-item label="处理状态">
+          <el-radio-group v-model="detail.isHandle">
+            <el-radio label="Y">已处理</el-radio>
+            <el-radio label="N">未处理</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isShowDialog = false">取 消</el-button>
+        <el-button type="primary" @click="toConfirmDetail()">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./repairinfomanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -151,11 +215,14 @@ export default {
     return {
       loading: false,
       showType: false,
+      isShowDialog: false,
       data: "",
       selectionData: "",
+      classdata: [],
+      detail: {},
       params: {
-        name: "",
-        areaName: "",
+        studentName: "",
+        studentId: "",
         pageNum: 1,
         pageSize: 10,
         isDesc: "",
@@ -175,6 +242,9 @@ export default {
             this.loading = false;
             this.$message.success(res.data.msg);
             this.data = res.data.data;
+            this.data.list.forEach((e) => {
+              e.status = this.formatHandle(e.isHandle);
+            });
             return;
           }
           this.loading = false;
@@ -193,29 +263,21 @@ export default {
       this.selectionData = val;
     },
     toDetail(res, type) {
-      this.$router.push({
-        path: "/admin/detailclassroommanage",
-        query: {
-          id: res,
-          type: type,
-        },
+      this.detail = res;
+      this.isShowDialog = true;
+    },
+    // 同意
+    toConfirmDetail() {
+      api.update(this.detail).then((res) => {
+        this.isShowDialog = false;
+        this.getList();
       });
     },
     // 删除
     toDelete(res) {
-      // let ids = [];
-      // ids.push(res);
       this.submitDel(res);
     },
-    handleDelete() {
-      // if (this.selectionData.length > 0) {
-      //   let ids = [];
-      //   this.selectionData.forEach((e) => {
-      //     ids.push(e.id);
-      //   });
-      //   this.submitDel(ids);
-      // }
-    },
+    handleDelete() {},
     // 确认删除
     submitDel(res) {
       this.$confirm("是否删除所选条项?", "提示", {
@@ -259,6 +321,11 @@ export default {
         return;
       }
       this.getList();
+    },
+    // 异常学生筛选
+    formatHandle(res) {
+      if (res === "N") return "未处理";
+      if (res === "Y") return "已处理";
     },
     ...comm,
   },

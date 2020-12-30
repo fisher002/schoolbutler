@@ -4,8 +4,14 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入场地名称"
-            v-model="params.areaName"
+            placeholder="请输入课程名称"
+            v-model="params.courseName"
+            clearable
+          ></el-input>
+          <div style="width: 10px"></div>
+          <el-input
+            placeholder="请输入班级名称"
+            v-model="params.className"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -34,6 +40,7 @@
             type="primary"
             icon="el-icon-circle-plus-outline"
             @click="toDetail(null, 'add')"
+            disabled
             >新增</el-button
           >
         </div>
@@ -61,35 +68,66 @@
             width="50"
           ></el-table-column>
           <el-table-column
-            prop="name"
+            prop="courseName"
             align="center"
             sortable
-            label="教室名称"
-            width="100"
-          ></el-table-column>
-          <el-table-column
-            prop="schoolName"
-            align="center"
-            sortable
-            label="校区"
+            label="课程"
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="areaName"
+            prop="specialityName"
             align="center"
             sortable
-            label="场地"
+            label="专业"
             width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="classRoomName"
+            align="center"
+            sortable
+            label="上课地点"
+            width="200"
+          >
+            <template slot-scope="scope">
+              <span>{{
+                `${scope.row.areaName}-${scope.row.classRoomName}`
+              }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="className"
+            align="center"
+            sortable
+            label="班级"
+            width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="teacherName"
+            align="center"
+            sortable
+            label="教师"
+            width="150"
           ></el-table-column>
           <el-table-column
             prop="editDate"
             align="center"
             sortable
-            label="编辑时间"
+            label="开始时间"
             width="150"
           >
             <template slot-scope="scope">
-              <span>{{ formatDateV1(scope.row.editDate) }}</span>
+              <span>{{ formatDate(scope.row.startClassDate) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="editDate"
+            align="center"
+            sortable
+            label="结束时间"
+            width="150"
+          >
+            <template slot-scope="scope">
+              <span>{{ formatDate(scope.row.endClassDate) }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -102,13 +140,19 @@
             <template slot-scope="scope">
               <span
                 :style="{
-                  color: scope.row.isDelete == 'N' ? '#1fca1f' : 'red',
+                  color: returnCourseStatus(scope.row.startClassDate)
+                    ? 'red'
+                    : '#1fca1f',
                 }"
-                >{{ scope.row.isDelete == "N" ? "可用" : "审核中" }}</span
+                >{{
+                  returnCourseStatus(scope.row.startClassDate)
+                    ? "已结束"
+                    : "未开始"
+                }}</span
               >
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" min-width="20">
+          <el-table-column fixed="right" label="操作" min-width="200">
             <template slot-scope="scope">
               <el-button
                 @click="toDetail(scope.row.id, 'detail')"
@@ -117,11 +161,13 @@
                 >查看</el-button
               >
               <el-button
-                @click="toDelete(scope.row.id)"
+                @click="
+                  toNextChild('/teacher/studentclockmanage', scope.row.id)
+                "
+                v-if="returnCourseStatus(scope.row.startClassDate)"
                 type="text"
                 size="small"
-                style="color: red"
-                >删除</el-button
+                >学生打卡情况</el-button
               >
             </template>
           </el-table-column>
@@ -143,7 +189,7 @@
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./coursearrangemanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -155,7 +201,10 @@ export default {
       selectionData: "",
       params: {
         name: "",
-        areaName: "",
+        classId: "",
+        className: "",
+        courseName: "",
+        teacherId: "",
         pageNum: 1,
         pageSize: 10,
         isDesc: "",
@@ -163,6 +212,7 @@ export default {
     };
   },
   created() {
+    this.params.teacherId = sessionStorage.getItem("teacherId");
     this.getList();
   },
   methods: {
@@ -194,10 +244,19 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailclassroommanage",
+        path: "/teacher/detailcoursearrangemanage",
         query: {
           id: res,
           type: type,
+        },
+      });
+    },
+    // 下级页面
+    toNextChild(url, id) {
+      this.$router.push({
+        path: url,
+        query: {
+          courseArrangeId: id,
         },
       });
     },

@@ -73,6 +73,26 @@
             ></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item
+          label="请选择班主任"
+          prop="teacherId"
+          v-if="data.collegeId"
+        >
+          <el-select
+            class="select-width"
+            v-model="data.teacherId"
+            clearable
+            placeholder="请选择"
+            @change="handleTeacher"
+          >
+            <el-option
+              v-for="item in teacherdata"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="请选择年级" prop="grade">
           <el-select
             class="select-width"
@@ -124,12 +144,11 @@
         <el-form-item label="二级学院">
           <span>{{ data.collegeName }}</span>
         </el-form-item>
-        <el-form-item
-          label="所属专业"
-          prop="specialityId"
-          v-if="data.collegeId"
-        >
+        <el-form-item label="所属专业">
           <span>{{ data.specialityName }}</span>
+        </el-form-item>
+        <el-form-item label="班主任">
+          <span>{{ data.teacherName }}</span>
         </el-form-item>
         <el-form-item label="年级" prop="grade">
           <span v-if="isShowEdit == false">{{ formatGrade(data.grade) }}</span>
@@ -175,6 +194,8 @@ export default {
         collegeName: "",
         specialityId: "",
         specialityName: "",
+        teacherId: "",
+        teacherName: "",
         grade: "",
         createDate: "",
         editDate: "",
@@ -183,6 +204,7 @@ export default {
       schooldata: [],
       collegedata: [],
       specialitydata: [],
+      teacherdata: [],
       params: {
         id: "",
         type: "",
@@ -205,6 +227,9 @@ export default {
         ],
         specialityId: [
           { required: true, message: "请选择专业", trigger: "change" },
+        ],
+        teacherId: [
+          { required: true, message: "请选择教师", trigger: "change" },
         ],
         grade: [{ required: true, message: "请选择年级", trigger: "change" }],
         createDate: [{ required: false, message: "", trigger: "blur" }],
@@ -283,12 +308,23 @@ export default {
         api.getSpecialityList({ collegeId: res }).then((res) => {
           this.specialitydata = res.data.data;
         });
+        // 获取教师
+        api.getTeacherList({ collegeId: res }).then((res) => {
+          this.teacherdata = res.data.data;
+        });
       }
     },
     // 选择专业后
     handleSpeciality(res) {
       if (res)
         this.data.specialityName = this.specialitydata.find(
+          (it) => it.id == res
+        ).name;
+    },
+    // 选择教师后
+    handleTeacher(res) {
+      if (res)
+        this.data.teacherName = this.teacherdata.find(
           (it) => it.id == res
         ).name;
     },

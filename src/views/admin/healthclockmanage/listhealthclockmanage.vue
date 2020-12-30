@@ -4,8 +4,14 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入场地名称"
-            v-model="params.areaName"
+            placeholder="请输入班级名称"
+            v-model="params.className"
+            clearable
+          ></el-input>
+          <div style="width: 10px"></div>
+          <el-input
+            placeholder="请输入学生名"
+            v-model="params.name"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -34,6 +40,7 @@
             type="primary"
             icon="el-icon-circle-plus-outline"
             @click="toDetail(null, 'add')"
+            disabled
             >新增</el-button
           >
         </div>
@@ -61,39 +68,66 @@
             width="50"
           ></el-table-column>
           <el-table-column
-            prop="name"
+            prop="studentName"
             align="center"
             sortable
-            label="教室名称"
+            label="学生"
             width="100"
           ></el-table-column>
           <el-table-column
-            prop="schoolName"
+            prop="className"
             align="center"
             sortable
-            label="校区"
-            width="200"
+            label="班级"
+            width="150"
           ></el-table-column>
           <el-table-column
-            prop="areaName"
+            prop="temperature"
             align="center"
             sortable
-            label="场地"
-            width="200"
-          ></el-table-column>
+            label="个人体温"
+            width="150"
+          >
+          </el-table-column>
           <el-table-column
-            prop="editDate"
+            prop="others"
             align="center"
             sortable
-            label="编辑时间"
+            label="其他情况"
             width="150"
           >
             <template slot-scope="scope">
-              <span>{{ formatDateV1(scope.row.editDate) }}</span>
+              <span>{{ `${scope.row.others.substr(0, 20)}...` }}</span>
             </template>
           </el-table-column>
           <el-table-column
-            prop="isDelete"
+            prop="location"
+            align="center"
+            sortable
+            label="打卡位置"
+            width="300"
+          ></el-table-column>
+          <el-table-column
+            prop="detailLocation"
+            align="center"
+            sortable
+            label="详细位置"
+            width="300"
+          >
+            <template slot-scope="scope">
+              <span>{{ `${scope.row.detailLocation.substr(0, 30)}...` }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="clockInDate"
+            align="center"
+            sortable
+            label="打卡时间"
+            width="180"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="status"
             align="center"
             sortable
             label="状态"
@@ -102,16 +136,16 @@
             <template slot-scope="scope">
               <span
                 :style="{
-                  color: scope.row.isDelete == 'N' ? '#1fca1f' : 'red',
+                  color: scope.row.status == '正常' ? '#1fca1f' : 'red',
                 }"
-                >{{ scope.row.isDelete == "N" ? "可用" : "审核中" }}</span
+                >{{ scope.row.status }}</span
               >
             </template>
           </el-table-column>
           <el-table-column fixed="right" label="操作" min-width="20">
             <template slot-scope="scope">
               <el-button
-                @click="toDetail(scope.row.id, 'detail')"
+                @click="toDetail(scope.row, 'detail')"
                 type="text"
                 size="small"
                 >查看</el-button
@@ -140,10 +174,54 @@
         ></el-pagination>
       </div>
     </div>
+    <el-dialog
+      title="学生打卡详情"
+      :visible.sync="isShowDialog"
+      width="30%"
+      center
+    >
+      <el-form :model="detail">
+        <el-form-item label="打卡学生">
+          <span>{{ detail.studentName }}</span>
+        </el-form-item>
+        <el-form-item label="所在班级">
+          <span>{{ detail.className }}</span>
+        </el-form-item>
+        <el-form-item label="个人体温">
+          <span>{{ detail.temperature }}</span>
+        </el-form-item>
+        <el-form-item label="其他情况">
+          <span>{{ detail.others || "无" }}</span>
+        </el-form-item>
+        <el-form-item label="打卡位置">
+          <span>{{ detail.location }}</span>
+        </el-form-item>
+        <el-form-item label="详细位置">
+          <span>{{ detail.detailLocation }}</span>
+        </el-form-item>
+        <el-form-item label="打卡时间">
+          <span>{{ detail.clockInDate }}</span>
+        </el-form-item>
+        <el-form-item label="学生状态">
+          <span
+            :style="{
+              color: detail.status == '正常' ? '#1fca1f' : 'red',
+            }"
+            >{{ detail.status }}</span
+          >
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isShowDialog = false">取 消</el-button>
+        <el-button type="primary" @click="isShowDialog = false"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./healthclockmanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -151,11 +229,16 @@ export default {
     return {
       loading: false,
       showType: false,
+      isShowDialog: false,
       data: "",
       selectionData: "",
+      detail: {},
       params: {
         name: "",
-        areaName: "",
+        classId: "",
+        className: "",
+        studentName: "",
+        studentId: "",
         pageNum: 1,
         pageSize: 10,
         isDesc: "",
@@ -175,6 +258,9 @@ export default {
             this.loading = false;
             this.$message.success(res.data.msg);
             this.data = res.data.data;
+            this.data.list.forEach((e) => {
+              e.status = this.checkAbNormal(e);
+            });
             return;
           }
           this.loading = false;
@@ -193,29 +279,14 @@ export default {
       this.selectionData = val;
     },
     toDetail(res, type) {
-      this.$router.push({
-        path: "/admin/detailclassroommanage",
-        query: {
-          id: res,
-          type: type,
-        },
-      });
+      this.detail = res;
+      this.isShowDialog = true;
     },
     // 删除
     toDelete(res) {
-      // let ids = [];
-      // ids.push(res);
       this.submitDel(res);
     },
-    handleDelete() {
-      // if (this.selectionData.length > 0) {
-      //   let ids = [];
-      //   this.selectionData.forEach((e) => {
-      //     ids.push(e.id);
-      //   });
-      //   this.submitDel(ids);
-      // }
-    },
+    handleDelete() {},
     // 确认删除
     submitDel(res) {
       this.$confirm("是否删除所选条项?", "提示", {
@@ -259,6 +330,20 @@ export default {
         return;
       }
       this.getList();
+    },
+    // 异常学生筛选
+    checkAbNormal(res) {
+      if (res.temperature.includes("低热" || "中热" || "高热")) {
+        return "异常";
+      }
+      if (
+        res.others.includes(
+          "感冒样" || "憋喘" || "高发地" || "确诊" || "心慌" || "腹泻" || "入境"
+        )
+      ) {
+        return "异常";
+      }
+      return "正常";
     },
     ...comm,
   },

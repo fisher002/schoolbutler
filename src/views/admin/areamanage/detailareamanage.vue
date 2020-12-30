@@ -26,36 +26,15 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <div class="demo_width"></div>
-          <el-form-item
-            label="请选择场地"
-            prop="areaId"
-            v-if="commData.schoolId"
-          >
-            <el-select
-              class="select-width"
-              v-model="commData.areaId"
-              clearable
-              placeholder="请选择"
-              @change="handleArea"
-            >
-              <el-option
-                v-for="item in areadata"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              ></el-option>
-            </el-select>
-          </el-form-item>
         </div>
         <el-divider></el-divider>
         <div class="list_data" v-if="data">
           <div class="list_item" v-for="(item, index) in data" :key="index">
             <div>
-              <el-form-item label="教室名称">
+              <el-form-item label="场地名称">
                 <el-input
                   v-model="item.name"
-                  placeholder="请输入教室名称"
+                  placeholder="请输入场地名称"
                   clearable
                 ></el-input>
               </el-form-item>
@@ -93,7 +72,7 @@
         class="demo-ruleForm center"
         label-position="left"
       >
-        <el-form-item label="教室">
+        <el-form-item label="场地名称">
           <span v-if="isShowEdit == false">{{ data.name }}</span>
           <el-input
             v-else
@@ -104,15 +83,6 @@
         </el-form-item>
         <el-form-item label="校区">
           <span>{{ data.schoolName }}</span>
-        </el-form-item>
-        <el-form-item label="位置">
-          <span v-if="isShowEdit == false">{{ data.areaName }}</span>
-          <el-input
-            v-else
-            v-model="data.areaName"
-            class="input-widths"
-            clearable
-          ></el-input>
         </el-form-item>
       </el-form>
       <div class="cancel-width">
@@ -126,7 +96,7 @@
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./areamanageUrl";
 import util from "@/util/util";
 export default {
   data() {
@@ -137,8 +107,6 @@ export default {
           name: "",
           schoolId: "",
           schoolName: "",
-          areaId: "",
-          areaName: "",
           createDate: "",
           editDate: "",
           isDelete: "N",
@@ -147,18 +115,15 @@ export default {
       commData: {
         schoolId: "",
         schoolName: "",
-        areaId: "",
-        areaName: "",
       },
       schooldata: [],
-      areadata: [],
       params: {
         id: "",
         type: "",
       },
       rules: {
         name: [
-          { required: true, message: "教室名称不能为空", trigger: "blur" },
+          { required: true, message: "场地名称不能为空", trigger: "blur" },
           {
             min: 1,
             max: 15,
@@ -169,7 +134,6 @@ export default {
         schoolId: [
           { required: true, message: "请选择学校", trigger: "change" },
         ],
-        areaId: [{ required: true, message: "请选择场地", trigger: "change" }],
         createDate: [{ required: false, message: "", trigger: "blur" }],
         editDate: [{ required: false, message: "", trigger: "blur" }],
       },
@@ -235,15 +199,6 @@ export default {
         this.commData.schoolName = this.schooldata.find(
           (it) => it.id === res
         ).schoolName;
-        api.getAreaList({ schoolId: res }).then((res) => {
-          res.data.code == 10000 ? (this.areadata = res.data.data) : null;
-        });
-      }
-    },
-    // 选择场地后
-    handleArea(res) {
-      if (res) {
-        this.commData.areaName = this.areadata.find((it) => it.id === res).name;
         for (let i in this.commData) {
           this.data[0][i] = this.commData[i];
         }
@@ -273,7 +228,6 @@ export default {
         name: "",
         schoolId: "",
         schoolName: "",
-        areaName: "",
         createDate: "",
         editDate: "",
         isDelete: "N",

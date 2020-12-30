@@ -21,6 +21,15 @@ import listclassroommanage from '@/views/admin/classroommanage/listclassroommana
 import detailclassroommanage from '@/views/admin/classroommanage/detailclassroommanage'
 import listcoursearrangemanage from '@/views/admin/coursearrangemanage/listcoursearrangemanage'
 import detailcoursearrangemanage from '@/views/admin/coursearrangemanage/detailcoursearrangemanage'
+import listareamanage from '@/views/admin/areamanage/listareamanage'
+import detailareamanage from '@/views/admin/areamanage/detailareamanage'
+import listteachfeedbackmanage from '@/views/admin/teachfeedbackmanage/listteachfeedbackmanage'
+import detailteachfeedbackmanage from '@/views/admin/teachfeedbackmanage/detailteachfeedbackmanage'
+import listhealthclockmanage from '@/views/admin/healthclockmanage/listhealthclockmanage'
+import liststudentleavemanage from '@/views/admin/studentleavemanage/liststudentleavemanage'
+import liststudenterrormanage from '@/views/admin/studenterrormanage/liststudenterrormanage'
+import detailstudenterrormanage from '@/views/admin/studenterrormanage/detailstudenterrormanage'
+import listrepairinfomanage from '@/views/admin/repairinfomanage/listrepairinfomanage'
 
 
 export default [{
@@ -137,5 +146,50 @@ export default [{
     path: '/admin/detailcoursearrangemanage',
     name: 'detailcoursearrangemanage',
     component: detailcoursearrangemanage,
-  }
+  },
+  {
+    path: '/admin/areamanage',
+    name: 'areamanage',
+    component: listareamanage,
+  },
+  {
+    path: '/admin/detailareamanage',
+    name: 'detailareamanage',
+    component: detailareamanage,
+  },
+  {
+    path: '/admin/teachfeedbackmanage',
+    name: 'teachfeedbackmanage',
+    component: listteachfeedbackmanage,
+  },
+  {
+    path: '/admin/detailteachfeedbackmanage',
+    name: 'detailteachfeedbackmanage',
+    component: detailteachfeedbackmanage,
+  },
+  {
+    path: '/admin/healthclockmanage',
+    name: 'healthclockmanage',
+    component: listhealthclockmanage,
+  },
+  {
+    path: '/admin/studentleavemanage',
+    name: 'studentleavemanage',
+    component: liststudentleavemanage,
+  },
+  {
+    path: '/admin/studenterrormanage',
+    name: 'studenterrormanage',
+    component: liststudenterrormanage,
+  },
+  {
+    path: '/admin/detailstudenterrormanage',
+    name: 'detailstudenterrormanage',
+    component: detailstudenterrormanage,
+  },
+  {
+    path: '/admin/repairinfomanage',
+    name: 'repairinfomanage',
+    component: listrepairinfomanage,
+  },
 ]

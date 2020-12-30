@@ -3,9 +3,22 @@
     <div v-if="showType == false">
       <div class="box-top">
         <div class="top-left">
+          <el-select
+            class="select-width"
+            v-model="params.classId"
+            placeholder="请选择班级"
+          >
+            <el-option
+              v-for="item in classdata"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+          <div style="width: 10px"></div>
           <el-input
-            placeholder="请输入场地名称"
-            v-model="params.areaName"
+            placeholder="请输入学生名称"
+            v-model="params.studentName"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -34,6 +47,7 @@
             type="primary"
             icon="el-icon-circle-plus-outline"
             @click="toDetail(null, 'add')"
+            disabled
             >新增</el-button
           >
         </div>
@@ -61,37 +75,82 @@
             width="50"
           ></el-table-column>
           <el-table-column
-            prop="name"
+            prop="courseName"
             align="center"
             sortable
-            label="教室名称"
-            width="100"
-          ></el-table-column>
-          <el-table-column
-            prop="schoolName"
-            align="center"
-            sortable
-            label="校区"
+            label="课程"
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="areaName"
+            prop="studentName"
             align="center"
             sortable
-            label="场地"
+            label="学生"
+            width="130"
+          ></el-table-column>
+          <el-table-column
+            prop="classRoomName"
+            align="center"
+            sortable
+            label="上课地点"
+            width="180"
+          >
+            <template slot-scope="scope">
+              <span>{{
+                `${scope.row.areaName}-${scope.row.classRoomName}`
+              }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="className"
+            align="center"
+            sortable
+            label="班级"
             width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="teacherName"
+            align="center"
+            sortable
+            label="教师"
+            width="130"
           ></el-table-column>
           <el-table-column
             prop="editDate"
             align="center"
             sortable
-            label="编辑时间"
+            label="开始时间"
             width="150"
           >
             <template slot-scope="scope">
-              <span>{{ formatDateV1(scope.row.editDate) }}</span>
+              <span>{{ formatDate(scope.row.startClassDate) }}</span>
             </template>
           </el-table-column>
+          <el-table-column
+            prop="editDate"
+            align="center"
+            sortable
+            label="结束时间"
+            width="150"
+          >
+            <template slot-scope="scope">
+              <span>{{ formatDate(scope.row.endClassDate) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="clockInDate"
+            align="center"
+            sortable
+            label="签到时间"
+            width="180"
+          ></el-table-column>
+          <el-table-column
+            prop="clockOutDate"
+            align="center"
+            sortable
+            label="签退时间"
+            width="180"
+          ></el-table-column>
           <el-table-column
             prop="isDelete"
             align="center"
@@ -108,20 +167,13 @@
               >
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" min-width="20">
+          <el-table-column fixed="right" label="操作" min-width="200">
             <template slot-scope="scope">
               <el-button
                 @click="toDetail(scope.row.id, 'detail')"
                 type="text"
                 size="small"
                 >查看</el-button
-              >
-              <el-button
-                @click="toDelete(scope.row.id)"
-                type="text"
-                size="small"
-                style="color: red"
-                >删除</el-button
               >
             </template>
           </el-table-column>
@@ -143,7 +195,7 @@
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./studentclockmanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -153,9 +205,12 @@ export default {
       showType: false,
       data: "",
       selectionData: "",
+      classdata: [],
       params: {
-        name: "",
-        areaName: "",
+        studentName: "",
+        classId: "",
+        className: "",
+        courseArrangeId: "",
         pageNum: 1,
         pageSize: 10,
         isDesc: "",
@@ -163,9 +218,22 @@ export default {
     };
   },
   created() {
-    this.getList();
+    this.params.courseArrangeId = this.$route.query.courseArrangeId;
+    this.getClassList();
   },
   methods: {
+    // 获取班级
+    getClassList() {
+      if (sessionStorage.getItem("teacherId")) {
+        api
+          .getClassList({ teacherId: sessionStorage.getItem("teacherId") })
+          .then((res) => {
+            this.classdata = res.data.data;
+            this.params.classId = res.data.data[0].id;
+            this.getList();
+          });
+      }
+    },
     // 获取列表
     getList() {
       this.loading = true;
@@ -194,7 +262,7 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailclassroommanage",
+        path: "/teacher/detailstudentclockmanage",
         query: {
           id: res,
           type: type,

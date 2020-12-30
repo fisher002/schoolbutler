@@ -3,9 +3,22 @@
     <div v-if="showType == false">
       <div class="box-top">
         <div class="top-left">
+          <el-select
+            class="select-width"
+            v-model="params.classId"
+            placeholder="请选择班级"
+          >
+            <el-option
+              v-for="item in classdata"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+          <div style="width: 10px"></div>
           <el-input
-            placeholder="请输入场地名称"
-            v-model="params.areaName"
+            placeholder="请输入学生名"
+            v-model="params.name"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -34,6 +47,7 @@
             type="primary"
             icon="el-icon-circle-plus-outline"
             @click="toDetail(null, 'add')"
+            disabled
             >新增</el-button
           >
         </div>
@@ -61,67 +75,72 @@
             width="50"
           ></el-table-column>
           <el-table-column
-            prop="name"
+            prop="studentName"
             align="center"
             sortable
-            label="教室名称"
+            label="学生"
             width="100"
           ></el-table-column>
           <el-table-column
-            prop="schoolName"
+            prop="className"
             align="center"
             sortable
-            label="校区"
-            width="200"
+            label="班级"
+            width="150"
           ></el-table-column>
           <el-table-column
-            prop="areaName"
+            prop="others"
             align="center"
             sortable
-            label="场地"
-            width="200"
-          ></el-table-column>
-          <el-table-column
-            prop="editDate"
-            align="center"
-            sortable
-            label="编辑时间"
+            label="请假理由"
             width="150"
           >
             <template slot-scope="scope">
-              <span>{{ formatDateV1(scope.row.editDate) }}</span>
+              <span>{{ `${scope.row.reason.substr(0, 20)}...` }}</span>
             </template>
           </el-table-column>
           <el-table-column
-            prop="isDelete"
+            prop="detailLocation"
+            align="center"
+            sortable
+            label="详情描述"
+            width="300"
+          >
+            <template slot-scope="scope">
+              <span>{{ `${scope.row.content.substr(0, 30)}...` }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="leaveStartDate"
+            align="center"
+            sortable
+            label="开始时间"
+            width="180"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="leaveEndDate"
+            align="center"
+            sortable
+            label="结束时间"
+            width="180"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="status"
             align="center"
             sortable
             label="状态"
             width="100"
           >
-            <template slot-scope="scope">
-              <span
-                :style="{
-                  color: scope.row.isDelete == 'N' ? '#1fca1f' : 'red',
-                }"
-                >{{ scope.row.isDelete == "N" ? "可用" : "审核中" }}</span
-              >
-            </template>
           </el-table-column>
           <el-table-column fixed="right" label="操作" min-width="20">
             <template slot-scope="scope">
               <el-button
-                @click="toDetail(scope.row.id, 'detail')"
+                @click="toDetail(scope.row, 'detail')"
                 type="text"
                 size="small"
                 >查看</el-button
-              >
-              <el-button
-                @click="toDelete(scope.row.id)"
-                type="text"
-                size="small"
-                style="color: red"
-                >删除</el-button
               >
             </template>
           </el-table-column>
@@ -140,10 +159,51 @@
         ></el-pagination>
       </div>
     </div>
+    <el-dialog
+      title="学生打卡详情"
+      :visible.sync="isShowDialog"
+      width="30%"
+      center
+    >
+      <el-form :model="detail">
+        <el-form-item label="申请学生">
+          <span>{{ detail.studentName }}</span>
+        </el-form-item>
+        <el-form-item label="所在班级">
+          <span>{{ detail.className }}</span>
+        </el-form-item>
+        <el-form-item label="请假理由">
+          <span>{{ detail.reason || "无" }}</span>
+        </el-form-item>
+        <el-form-item label="详情描述">
+          <span>{{ detail.content }}</span>
+        </el-form-item>
+        <el-form-item label="申请时间">
+          <span>{{ detail.createDate }}</span>
+        </el-form-item>
+        <el-form-item label="开始时间">
+          <span>{{ detail.leaveStartDate }}</span>
+        </el-form-item>
+        <el-form-item label="结束时间">
+          <span>{{ detail.leaveEndDate }}</span>
+        </el-form-item>
+        <el-form-item label="申请状态">
+          <el-radio-group v-model="detail.isAgree">
+            <el-radio label="editing">审核中</el-radio>
+            <el-radio label="Y">同意申请</el-radio>
+            <el-radio label="N">不同意</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isShowDialog = false">取 消</el-button>
+        <el-button type="primary" @click="toConfirmDetail()">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./studentleavemanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -151,11 +211,17 @@ export default {
     return {
       loading: false,
       showType: false,
+      isShowDialog: false,
       data: "",
       selectionData: "",
+      classdata: [],
+      detail: {},
       params: {
         name: "",
-        areaName: "",
+        classId: "",
+        className: "",
+        studentName: "",
+        studentId: "",
         pageNum: 1,
         pageSize: 10,
         isDesc: "",
@@ -163,9 +229,21 @@ export default {
     };
   },
   created() {
-    this.getList();
+    this.getClassList();
   },
   methods: {
+    // 获取班级
+    getClassList() {
+      if (sessionStorage.getItem("teacherId")) {
+        api
+          .getClassList({ teacherId: sessionStorage.getItem("teacherId") })
+          .then((res) => {
+            this.classdata = res.data.data;
+            this.params.classId = res.data.data[0].id;
+            this.getList();
+          });
+      }
+    },
     // 获取列表
     getList() {
       this.loading = true;
@@ -175,6 +253,9 @@ export default {
             this.loading = false;
             this.$message.success(res.data.msg);
             this.data = res.data.data;
+            this.data.list.forEach((e) => {
+              e.status = this.formatAgree(e.isAgree);
+            });
             return;
           }
           this.loading = false;
@@ -193,57 +274,17 @@ export default {
       this.selectionData = val;
     },
     toDetail(res, type) {
-      this.$router.push({
-        path: "/admin/detailclassroommanage",
-        query: {
-          id: res,
-          type: type,
-        },
+      this.detail = res;
+      this.isShowDialog = true;
+    },
+    // 同意
+    toConfirmDetail() {
+      api.update(this.detail).then((res) => {
+        this.isShowDialog = false;
+        this.getList();
       });
     },
-    // 删除
-    toDelete(res) {
-      // let ids = [];
-      // ids.push(res);
-      this.submitDel(res);
-    },
-    handleDelete() {
-      // if (this.selectionData.length > 0) {
-      //   let ids = [];
-      //   this.selectionData.forEach((e) => {
-      //     ids.push(e.id);
-      //   });
-      //   this.submitDel(ids);
-      // }
-    },
-    // 确认删除
-    submitDel(res) {
-      this.$confirm("是否删除所选条项?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-        center: true,
-      })
-        .then(() => {
-          api.delete({ id: res }).then(
-            (res) => {
-              if (res.data.code == 10000) {
-                this.$message.success(res.data.msg);
-                this.getList();
-                return;
-              }
-              this.$message.error(res.data.msg);
-            },
-            (res) => {}
-          );
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除",
-          });
-        });
-    },
+    handleDelete() {},
     // 页码改变
     pageNumChange(res) {
       if (this.data.total <= 10) {
@@ -259,6 +300,12 @@ export default {
         return;
       }
       this.getList();
+    },
+    // 异常学生筛选
+    formatAgree(res) {
+      if (res === "N") return "不同意";
+      if (res === "Y") return "同意";
+      if (res === "editing") return "审核中";
     },
     ...comm,
   },

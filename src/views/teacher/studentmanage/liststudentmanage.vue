@@ -4,8 +4,26 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入场地名称"
-            v-model="params.areaName"
+            placeholder="请输入班级名称"
+            v-model="params.className"
+            clearable
+          ></el-input>
+          <div style="width: 10px"></div>
+          <el-input
+            placeholder="请输入学生名"
+            v-model="params.name"
+            clearable
+          ></el-input>
+          <div style="width: 10px"></div>
+          <el-input
+            placeholder="请输入学号"
+            v-model="params.studentId"
+            clearable
+          ></el-input>
+          <div style="width: 10px"></div>
+          <el-input
+            placeholder="请输入手机号"
+            v-model="params.phone"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -34,6 +52,7 @@
             type="primary"
             icon="el-icon-circle-plus-outline"
             @click="toDetail(null, 'add')"
+            disabled
             >新增</el-button
           >
         </div>
@@ -64,7 +83,25 @@
             prop="name"
             align="center"
             sortable
-            label="教室名称"
+            label="姓名"
+            width="100"
+          ></el-table-column>
+          <el-table-column
+            prop="sex"
+            align="center"
+            sortable
+            label="性别"
+            width="80"
+          >
+            <template slot-scope="scope">
+              <span>{{ formatSex(scope.row.sex) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="studentId"
+            align="center"
+            sortable
+            label="学号"
             width="100"
           ></el-table-column>
           <el-table-column
@@ -75,12 +112,37 @@
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="areaName"
+            prop="collegeName"
             align="center"
             sortable
-            label="场地"
+            label="二级学院名称"
             width="200"
           ></el-table-column>
+          <el-table-column
+            prop="specialityName"
+            align="center"
+            sortable
+            label="专业名称"
+            width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="className"
+            align="center"
+            sortable
+            label="班级"
+            width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="grade"
+            align="center"
+            sortable
+            label="年级"
+            width="100"
+          >
+            <template slot-scope="scope">
+              <span>{{ formatGrade(scope.row.grade) }}</span>
+            </template>
+          </el-table-column>
           <el-table-column
             prop="editDate"
             align="center"
@@ -116,13 +178,6 @@
                 size="small"
                 >查看</el-button
               >
-              <el-button
-                @click="toDelete(scope.row.id)"
-                type="text"
-                size="small"
-                style="color: red"
-                >删除</el-button
-              >
             </template>
           </el-table-column>
         </el-table>
@@ -143,7 +198,7 @@
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./studentmanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -155,7 +210,14 @@ export default {
       selectionData: "",
       params: {
         name: "",
-        areaName: "",
+        classId: "",
+        className: "",
+        specialityId: "",
+        specialityName: "",
+        collegeName: "",
+        studentId: "",
+        phone: "",
+        grade: "",
         pageNum: 1,
         pageSize: 10,
         isDesc: "",
@@ -163,6 +225,7 @@ export default {
     };
   },
   created() {
+    this.params.classId = this.$route.query.classId;
     this.getList();
   },
   methods: {
@@ -194,18 +257,12 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailclassroommanage",
+        path: "/teacher/detailstudentmanage",
         query: {
           id: res,
           type: type,
         },
       });
-    },
-    // 删除
-    toDelete(res) {
-      // let ids = [];
-      // ids.push(res);
-      this.submitDel(res);
     },
     handleDelete() {
       // if (this.selectionData.length > 0) {
@@ -215,34 +272,6 @@ export default {
       //   });
       //   this.submitDel(ids);
       // }
-    },
-    // 确认删除
-    submitDel(res) {
-      this.$confirm("是否删除所选条项?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-        center: true,
-      })
-        .then(() => {
-          api.delete({ id: res }).then(
-            (res) => {
-              if (res.data.code == 10000) {
-                this.$message.success(res.data.msg);
-                this.getList();
-                return;
-              }
-              this.$message.error(res.data.msg);
-            },
-            (res) => {}
-          );
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除",
-          });
-        });
     },
     // 页码改变
     pageNumChange(res) {

@@ -1,6 +1,6 @@
 import axios from '@/axios/axios'
 const baseUrl = '/api'
-const url = '/ac/classroom'
+const url = '/ac/healthclock'
 
 export default {
   getList(param) {
@@ -25,13 +25,6 @@ export default {
       method: 'get'
     })
   },
-  update(param, type) {
-    return axios({
-      url: type === 'add' ? `${baseUrl}${url}/listadd` : `${baseUrl}${url}/edit`,
-      method: 'post',
-      data: param
-    })
-  },
   delete(param) {
     return axios({
       url: `${baseUrl}${url}/delete`,
@@ -39,18 +32,11 @@ export default {
       params: param
     })
   },
-  getSchoolList(param) {
+  getClassList(param) {
     return axios({
-      url: `${baseUrl}/ac/school/list`,
-      method: 'post',
-      data: {}
-    })
-  },
-  getAreaList(param) {
-    return axios({
-      url: `${baseUrl}/ac/area/list`,
+      url: `${baseUrl}/tc/studentclass/list`,
       method: 'post',
       data: param
     })
-  }
+  },
 }

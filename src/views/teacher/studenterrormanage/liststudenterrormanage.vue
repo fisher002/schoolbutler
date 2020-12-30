@@ -3,9 +3,22 @@
     <div v-if="showType == false">
       <div class="box-top">
         <div class="top-left">
+          <el-select
+            class="select-width"
+            v-model="params.classId"
+            placeholder="请选择班级"
+          >
+            <el-option
+              v-for="item in classdata"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+          <div style="width: 10px"></div>
           <el-input
-            placeholder="请输入场地名称"
-            v-model="params.areaName"
+            placeholder="请输入学生名"
+            v-model="params.name"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -34,6 +47,7 @@
             type="primary"
             icon="el-icon-circle-plus-outline"
             @click="toDetail(null, 'add')"
+            disabled
             >新增</el-button
           >
         </div>
@@ -61,26 +75,59 @@
             width="50"
           ></el-table-column>
           <el-table-column
-            prop="name"
+            prop="studentName"
             align="center"
             sortable
-            label="教室名称"
+            label="姓名"
             width="100"
           ></el-table-column>
           <el-table-column
-            prop="schoolName"
+            prop="className"
             align="center"
             sortable
-            label="校区"
+            label="班级"
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="areaName"
+            prop="grade"
             align="center"
             sortable
-            label="场地"
-            width="200"
+            label="年级"
+            width="100"
+          >
+            <template slot-scope="scope">
+              <span>{{ formatGrade(scope.row.grade) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="errorType"
+            align="center"
+            sortable
+            label="违纪类别"
+            width="150"
           ></el-table-column>
+          <el-table-column
+            prop="content"
+            align="center"
+            sortable
+            label="违纪原因"
+            width="200"
+          >
+            <template slot-scope="scope">
+              <span>{{ `${scope.row.reason.substr(0, 15)}...` }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="content"
+            align="center"
+            sortable
+            label="违纪详情"
+            width="350"
+          >
+            <template slot-scope="scope">
+              <span>{{ `${scope.row.content.substr(0, 30)}...` }}</span>
+            </template>
+          </el-table-column>
           <el-table-column
             prop="editDate"
             align="center"
@@ -93,7 +140,7 @@
             </template>
           </el-table-column>
           <el-table-column
-            prop="isDelete"
+            prop="isCancel"
             align="center"
             sortable
             label="状态"
@@ -102,26 +149,19 @@
             <template slot-scope="scope">
               <span
                 :style="{
-                  color: scope.row.isDelete == 'N' ? '#1fca1f' : 'red',
+                  color: scope.row.isCancel == 'N' ? 'red' : '#1fca1f',
                 }"
-                >{{ scope.row.isDelete == "N" ? "可用" : "审核中" }}</span
+                >{{ scope.row.isCancel == "N" ? "未撤销" : "已撤销" }}</span
               >
             </template>
           </el-table-column>
           <el-table-column fixed="right" label="操作" min-width="20">
             <template slot-scope="scope">
               <el-button
-                @click="toDetail(scope.row.id, 'detail')"
+                @click="toDetail(scope.row, 'detail')"
                 type="text"
                 size="small"
                 >查看</el-button
-              >
-              <el-button
-                @click="toDelete(scope.row.id)"
-                type="text"
-                size="small"
-                style="color: red"
-                >删除</el-button
               >
             </template>
           </el-table-column>
@@ -140,10 +180,51 @@
         ></el-pagination>
       </div>
     </div>
+    <el-dialog
+      title="学生违纪详情"
+      :visible.sync="isShowDialog"
+      width="30%"
+      center
+    >
+      <el-form :model="detail">
+        <el-form-item label="违纪学生">
+          <span>{{ detail.studentName }}</span>
+        </el-form-item>
+        <el-form-item label="所在班级">
+          <span>{{ detail.className }}</span>
+        </el-form-item>
+        <el-form-item label="所属年级">
+          <span>{{ formatGrade(detail.grade) }}</span>
+        </el-form-item>
+        <el-form-item label="违纪原因">
+          <span>{{ detail.reason || "无" }}</span>
+        </el-form-item>
+        <el-form-item label="违纪详情">
+          <span>{{ detail.content || "无" }}</span>
+        </el-form-item>
+        <el-form-item label="违纪类别">
+          <span>{{ detail.errorType }}</span>
+        </el-form-item>
+        <el-form-item label="撤销状态">
+          <span
+            :style="{
+              color: detail.isCancel == 'N' ? 'red' : '#1fca1f',
+            }"
+            >{{ detail.isCancel == "N" ? "未撤销" : "已撤销" }}</span
+          >
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isShowDialog = false">取 消</el-button>
+        <el-button type="primary" @click="isShowDialog = false"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./studenterrormanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -151,11 +232,21 @@ export default {
     return {
       loading: false,
       showType: false,
+      isShowDialog: false,
       data: "",
+      detail: "",
       selectionData: "",
+      classdata: [],
       params: {
         name: "",
-        areaName: "",
+        classId: "",
+        className: "",
+        specialityId: "",
+        specialityName: "",
+        collegeName: "",
+        studentId: "",
+        phone: "",
+        grade: "",
         pageNum: 1,
         pageSize: 10,
         isDesc: "",
@@ -163,9 +254,21 @@ export default {
     };
   },
   created() {
-    this.getList();
+    this.getClassList();
   },
   methods: {
+    // 获取班级
+    getClassList() {
+      if (sessionStorage.getItem("teacherId")) {
+        api
+          .getClassList({ teacherId: sessionStorage.getItem("teacherId") })
+          .then((res) => {
+            this.classdata = res.data.data;
+            this.params.classId = res.data.data[0].id;
+            this.getList();
+          });
+      }
+    },
     // 获取列表
     getList() {
       this.loading = true;
@@ -193,57 +296,13 @@ export default {
       this.selectionData = val;
     },
     toDetail(res, type) {
-      this.$router.push({
-        path: "/admin/detailclassroommanage",
-        query: {
-          id: res,
-          type: type,
-        },
-      });
+      if (type === "detail") {
+        this.isShowDialog = true;
+        this.detail = res;
+        return;
+      }
     },
-    // 删除
-    toDelete(res) {
-      // let ids = [];
-      // ids.push(res);
-      this.submitDel(res);
-    },
-    handleDelete() {
-      // if (this.selectionData.length > 0) {
-      //   let ids = [];
-      //   this.selectionData.forEach((e) => {
-      //     ids.push(e.id);
-      //   });
-      //   this.submitDel(ids);
-      // }
-    },
-    // 确认删除
-    submitDel(res) {
-      this.$confirm("是否删除所选条项?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-        center: true,
-      })
-        .then(() => {
-          api.delete({ id: res }).then(
-            (res) => {
-              if (res.data.code == 10000) {
-                this.$message.success(res.data.msg);
-                this.getList();
-                return;
-              }
-              this.$message.error(res.data.msg);
-            },
-            (res) => {}
-          );
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除",
-          });
-        });
-    },
+    handleDelete() {},
     // 页码改变
     pageNumChange(res) {
       if (this.data.total <= 10) {

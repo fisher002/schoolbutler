@@ -5,7 +5,7 @@
         <div class="top-left">
           <el-input
             placeholder="请输入场地名称"
-            v-model="params.areaName"
+            v-model="params.name"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -64,7 +64,7 @@
             prop="name"
             align="center"
             sortable
-            label="教室名称"
+            label="场地名称"
             width="100"
           ></el-table-column>
           <el-table-column
@@ -72,13 +72,6 @@
             align="center"
             sortable
             label="校区"
-            width="200"
-          ></el-table-column>
-          <el-table-column
-            prop="areaName"
-            align="center"
-            sortable
-            label="场地"
             width="200"
           ></el-table-column>
           <el-table-column
@@ -143,7 +136,7 @@
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./areamanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -155,7 +148,7 @@ export default {
       selectionData: "",
       params: {
         name: "",
-        areaName: "",
+        schoolName: "",
         pageNum: 1,
         pageSize: 10,
         isDesc: "",
@@ -194,7 +187,7 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailclassroommanage",
+        path: "/admin/detailareamanage",
         query: {
           id: res,
           type: type,

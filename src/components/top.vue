@@ -41,6 +41,7 @@
 </template>
 <script>
 import adminMenu from "@/datas/menuAdmin";
+import teacherMenu from "@/datas/menuTeacher"
 export default {
   props: ["userType"],
   data() {
@@ -53,7 +54,7 @@ export default {
     // 检查登录类型
     if (sessionStorage.getItem("user_type")) {
       let menu =
-        sessionStorage.getItem("user_type") === "admin" ? adminMenu : "";
+        sessionStorage.getItem("user_type") === "admin" ? adminMenu : teacherMenu;
       this.menuData = [...menu];
     }
   },

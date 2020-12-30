@@ -4,8 +4,8 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入场地名称"
-            v-model="params.areaName"
+            placeholder="请输入班级名"
+            v-model="params.name"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -34,6 +34,7 @@
             type="primary"
             icon="el-icon-circle-plus-outline"
             @click="toDetail(null, 'add')"
+            disabled
             >新增</el-button
           >
         </div>
@@ -64,8 +65,8 @@
             prop="name"
             align="center"
             sortable
-            label="教室名称"
-            width="100"
+            label="班级名称"
+            width="200"
           ></el-table-column>
           <el-table-column
             prop="schoolName"
@@ -75,18 +76,43 @@
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="areaName"
+            prop="collegeName"
             align="center"
             sortable
-            label="场地"
+            label="二级学院名称"
             width="200"
           ></el-table-column>
+          <el-table-column
+            prop="specialityName"
+            align="center"
+            sortable
+            label="专业名称"
+            width="200"
+          ></el-table-column>
+          <el-table-column
+            prop="teacherName"
+            align="center"
+            sortable
+            label="班主任"
+            width="100"
+          ></el-table-column>
+          <el-table-column
+            prop="grade"
+            align="center"
+            sortable
+            label="年级"
+            width="100"
+          >
+            <template slot-scope="scope">
+              <span>{{ formatGrade(scope.row.grade) }}</span>
+            </template>
+          </el-table-column>
           <el-table-column
             prop="editDate"
             align="center"
             sortable
             label="编辑时间"
-            width="150"
+            width="200"
           >
             <template slot-scope="scope">
               <span>{{ formatDateV1(scope.row.editDate) }}</span>
@@ -97,7 +123,7 @@
             align="center"
             sortable
             label="状态"
-            width="100"
+            width="150"
           >
             <template slot-scope="scope">
               <span
@@ -108,7 +134,7 @@
               >
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" min-width="20">
+          <el-table-column fixed="right" label="操作" min-width="200">
             <template slot-scope="scope">
               <el-button
                 @click="toDetail(scope.row.id, 'detail')"
@@ -117,11 +143,10 @@
                 >查看</el-button
               >
               <el-button
-                @click="toDelete(scope.row.id)"
+                @click="toNextChild('/teacher/studentmanage', scope.row.id)"
                 type="text"
                 size="small"
-                style="color: red"
-                >删除</el-button
+                >班级学生</el-button
               >
             </template>
           </el-table-column>
@@ -143,7 +168,7 @@
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./studentclassmanageUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -155,14 +180,15 @@ export default {
       selectionData: "",
       params: {
         name: "",
-        areaName: "",
+        teacherId: "",
         pageNum: 1,
         pageSize: 10,
-        isDesc: "",
+        grade: "",
       },
     };
   },
   created() {
+    this.params.teacherId = sessionStorage.getItem("teacherId");
     this.getList();
   },
   methods: {
@@ -194,56 +220,24 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailclassroommanage",
+        path: "/teacher/detailstudentclassmanage",
         query: {
           id: res,
           type: type,
         },
       });
     },
+    // 班级学生
+    toNextChild(url, id) {
+      this.$router.push({
+        path: url,
+        query: {
+          classId: id,
+        },
+      });
+    },
     // 删除
-    toDelete(res) {
-      // let ids = [];
-      // ids.push(res);
-      this.submitDel(res);
-    },
-    handleDelete() {
-      // if (this.selectionData.length > 0) {
-      //   let ids = [];
-      //   this.selectionData.forEach((e) => {
-      //     ids.push(e.id);
-      //   });
-      //   this.submitDel(ids);
-      // }
-    },
-    // 确认删除
-    submitDel(res) {
-      this.$confirm("是否删除所选条项?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-        center: true,
-      })
-        .then(() => {
-          api.delete({ id: res }).then(
-            (res) => {
-              if (res.data.code == 10000) {
-                this.$message.success(res.data.msg);
-                this.getList();
-                return;
-              }
-              this.$message.error(res.data.msg);
-            },
-            (res) => {}
-          );
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除",
-          });
-        });
-    },
+    handleDelete() {},
     // 页码改变
     pageNumChange(res) {
       if (this.data.total <= 10) {

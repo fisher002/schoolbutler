@@ -95,6 +95,13 @@
             width="200"
           ></el-table-column>
           <el-table-column
+            prop="teacherName"
+            align="center"
+            sortable
+            label="班主任"
+            width="100"
+          ></el-table-column>
+          <el-table-column
             prop="grade"
             align="center"
             sortable

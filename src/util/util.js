@@ -74,6 +74,16 @@ export default {
     }
     return grade[res];
   },
+  /**课程状态回馈 */
+  returnCourseStatus(res) {
+    let date = new Date(res),now = new Date();
+    // 已结束
+    if(date.getTime() < now.getTime()) {
+      return true;
+    }
+    // 未开始
+    return false;
+  },
   /**性别回馈 */
   formatSex(res) {
     return res === 'M' ? '男生' : '女生';

@@ -4,6 +4,8 @@ import login from '@/views/login/comLogin'
 import index from '@/views/index/index'
 // 管理员端
 import adminrouter from './adminrouter'
+// 教师端
+import teacherrouter from './teacherrouter'
 
 Vue.use(Router)
 
@@ -21,7 +23,7 @@ export default new Router({
         requireAuth: true // 配置此条，进入页面前判断是否需要登陆
       },
       children: [
-        ...adminrouter
+        ...adminrouter, ...teacherrouter
       ]
     }
   ]

@@ -55,7 +55,7 @@ export default {
     callBackBreak(res) {
       if (res) {
         this.breakData = this.$store.getters.getIndexBreakData;
-        this.$router.push({ path: res });
+        this.$router.replace({ path: res });
       }
     },
     addBreak() {

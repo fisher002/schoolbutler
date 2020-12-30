@@ -1,8 +1,15 @@
 import axios from '@/axios/axios'
 const baseUrl = '/api'
-const url = '/ac/classroom'
+const url = '/tc/studenterror'
 
 export default {
+  getPageList(param) {
+    return axios({
+      url: `${baseUrl}${url}/page`,
+      method: 'get',
+      params: param
+    })
+  },
   getList(param) {
     return axios({
       url: `${baseUrl}${url}/list`,
@@ -10,13 +17,6 @@ export default {
       data: {
         ...param
       }
-    })
-  },
-  getPageList(param) {
-    return axios({
-      url: `${baseUrl}${url}/page`,
-      method: 'get',
-      params: param
     })
   },
   getDetail(param) {
@@ -32,25 +32,11 @@ export default {
       data: param
     })
   },
-  delete(param) {
+  getClassList(param) {
     return axios({
-      url: `${baseUrl}${url}/delete`,
-      method: 'delete',
-      params: param
-    })
-  },
-  getSchoolList(param) {
-    return axios({
-      url: `${baseUrl}/ac/school/list`,
-      method: 'post',
-      data: {}
-    })
-  },
-  getAreaList(param) {
-    return axios({
-      url: `${baseUrl}/ac/area/list`,
+      url: `${baseUrl}/tc/studentclass/list`,
       method: 'post',
       data: param
     })
-  }
+  },
 }

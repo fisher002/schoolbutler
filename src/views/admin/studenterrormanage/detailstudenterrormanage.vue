@@ -70,27 +70,6 @@
           </el-form-item>
           <div class="demo_width"></div>
           <el-form-item
-            label="请选择课程"
-            prop="courseId"
-            v-if="commData.specialityId"
-          >
-            <el-select
-              class="select-width"
-              v-model="commData.courseId"
-              clearable
-              placeholder="请选择"
-              @change="handleCourse"
-            >
-              <el-option
-                v-for="item in coursedata"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <div class="demo_width"></div>
-          <el-form-item
             label="请选择班级"
             prop="classId"
             v-if="commData.specialityId"
@@ -110,84 +89,53 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <div class="demo_width"></div>
-          <el-form-item
-            label="请选择任教老师"
-            prop="teacherId"
-            v-if="commData.specialityId"
-          >
-            <el-select
-              class="select-width"
-              v-model="commData.teacherId"
-              clearable
-              placeholder="请选择"
-              @change="handleTeacher"
-            >
-              <el-option
-                v-for="item in teacherdata"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <div class="demo_width"></div>
-          <el-form-item label="请选择课室" prop="classRoomId">
-            <el-select
-              class="select-width"
-              v-model="commData.classRoomId"
-              clearable
-              placeholder="请选择"
-              @change="handleClassRoom"
-            >
-              <el-option
-                v-for="item in classroomdata"
-                :key="item.id"
-                :label="`${item.areaName}---${item.name}`"
-                :value="item.id"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <div class="demo_width"></div>
-          <el-form-item label="请选择年级" prop="grade">
-            <el-select
-              v-model="commData.grade"
-              clearable
-              placeholder="请选择"
-              @change="handleGrade"
-            >
-              <el-option label="大一" :value="1"></el-option>
-              <el-option label="大二" :value="2"></el-option>
-              <el-option label="大三" :value="3"></el-option>
-              <el-option label="大四" :value="4"></el-option>
-            </el-select>
-          </el-form-item>
         </div>
         <el-divider></el-divider>
         <div class="list_data" v-if="data">
           <div class="list_item" v-for="(item, index) in data" :key="index">
             <div>
-              <el-form-item label="请选择开始时间" prop="startClassDate">
-                <el-date-picker
-                  v-model="item.startClassDate"
-                  class="select-width"
-                  type="datetime"
-                  placeholder="选择日期时间"
+              <el-form-item label="违纪学生">
+                <el-select
+                  v-model="item.studentId"
                   clearable
-                  value-format="yyyy-MM-dd HH:mm:ss"
+                  placeholder="请选择学生"
+                  @change="handleStudent(item)"
                 >
-                </el-date-picker>
+                  <el-option
+                    v-for="it in studentdata"
+                    :key="it.id"
+                    :label="it.name"
+                    :value="it.id"
+                  ></el-option>
+                </el-select>
               </el-form-item>
-              <el-form-item label="请选择结束时间" prop="endClassDate">
-                <el-date-picker
-                  v-model="item.endClassDate"
+              <el-form-item label="违纪类别">
+                <el-select
                   class="select-width"
-                  type="datetime"
-                  placeholder="选择日期时间"
+                  v-model="item.errorType"
                   clearable
-                  value-format="yyyy-MM-dd HH:mm:ss"
+                  placeholder="请选择"
                 >
-                </el-date-picker>
+                  <el-option label="警告" value="警告"></el-option>
+                  <el-option label="严重警告" value="严重警告"></el-option>
+                  <el-option label="记过处分" value="记过处分"></el-option>
+                  <el-option label="开除学籍" value="开除学籍"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="违纪原因">
+                <el-input
+                  v-model="item.reason"
+                  placeholder="请输入违纪原因"
+                  clearable
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="违纪详情">
+                <el-input
+                  v-model="item.content"
+                  placeholder="请输入违纪详情"
+                  type="textarea"
+                  clearable
+                ></el-input>
               </el-form-item>
             </div>
             <div class="item_btn_box">
@@ -212,80 +160,10 @@
         <el-button type="primary" @click="back()">返回</el-button>
       </div>
     </div>
-    <div v-if="params.type == 'detail'">
-      <div class="cancel-width">
-        <el-button @click="cancelEdit()" icon="el-icon-edit">{{
-          isShowEdit ? "取消编辑" : "编辑"
-        }}</el-button>
-      </div>
-      <el-form
-        label-width="100px"
-        class="demo-ruleForm center"
-        label-position="left"
-      >
-        <el-form-item label="课程">
-          <span>{{ data.courseName }}</span>
-        </el-form-item>
-        <el-form-item label="所属专业" prop="specialityId">
-          <span>{{ data.specialityName }}</span>
-        </el-form-item>
-        <el-form-item label="所在班级" prop="classId">
-          <span>{{ data.className }}</span>
-        </el-form-item>
-        <el-form-item label="年级" prop="grade">
-          <span v-if="isShowEdit == false">{{ formatGrade(data.grade) }}</span>
-          <el-select
-            class="select-width"
-            v-model="data.grade"
-            clearable
-            v-else
-            placeholder="请选择"
-          >
-            <el-option label="大一" :value="1"></el-option>
-            <el-option label="大二" :value="2"></el-option>
-            <el-option label="大三" :value="3"></el-option>
-            <el-option label="大四" :value="4"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="开始时间" prop="startClassDate">
-          <span v-if="isShowEdit == false">{{ formatDate(data.startClassDate) }}</span>
-          <el-date-picker
-            v-model="data.startClassDate"
-            class="select-width"
-            type="datetime"
-            placeholder="选择日期时间"
-            clearable
-            value-format="yyyy-MM-dd HH:mm:ss"
-            v-else
-          >
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="结束时间" prop="endClassDate">
-          <span v-if="isShowEdit == false">{{ formatDate(data.endClassDate) }}</span>
-          <el-date-picker
-            v-model="data.endClassDate"
-            class="select-width"
-            type="datetime"
-            placeholder="选择日期时间"
-            clearable
-            value-format="yyyy-MM-dd HH:mm:ss"
-            v-else
-          >
-          </el-date-picker>
-        </el-form-item>
-      </el-form>
-      <div class="cancel-width">
-        <el-button v-show="isShowEdit" type="primary" @click="submitForm()"
-          >保存</el-button
-        >
-        <el-button v-show="isShowEdit" @click="resetForms()">重置</el-button>
-        <el-button type="primary" @click="back()">返回</el-button>
-      </div>
-    </div>
   </div>
 </template>
 <script>
-import api from "./coursearrangemanageUrl";
+import api from "./studenterrormanageUrl";
 import util from "@/util/util";
 export default {
   data() {
@@ -293,24 +171,13 @@ export default {
       isShowEdit: false,
       data: [
         {
-          specialityId: "",
-          specialityName: "",
-          teacherId: "",
-          teacherName: "",
+          studentId: "",
+          studentName: "",
           classId: "",
           className: "",
-          courseId: "",
-          courseName: "",
-          classRoomId: "",
-          classRoomName: "",
-          areaId: "",
-          areaName: "",
+          reason: "",
+          content: "",
           grade: "",
-          startClassDate: "",
-          endClassDate: "",
-          createDate: "",
-          editDate: "",
-          isDelete: "N",
         },
       ],
       commData: {
@@ -320,32 +187,22 @@ export default {
         collegeName: "",
         specialityId: "",
         specialityName: "",
-        teacherId: "",
-        teacherName: "",
         classId: "",
         className: "",
-        courseId: "",
-        courseName: "",
-        classRoomId: "",
-        classRoomName: "",
-        areaId: "",
-        areaName: "",
-        grade: "",
       },
       schooldata: [],
       collegedata: [],
       specialitydata: [],
-      teacherdata: [],
       classdata: [],
-      classroomdata: [],
-      coursedata: [],
+      studentdata: [],
+      number: 1,
       params: {
         id: "",
         type: "",
       },
       rules: {
         name: [
-          { required: true, message: "课程不能为空", trigger: "blur" },
+          { required: true, message: "姓名不能为空", trigger: "blur" },
           {
             min: 1,
             max: 15,
@@ -362,16 +219,7 @@ export default {
         specialityId: [
           { required: true, message: "请选择专业", trigger: "change" },
         ],
-        teacherId: [
-          { required: true, message: "请选择任教老师", trigger: "change" },
-        ],
         classId: [{ required: true, message: "请选择班级", trigger: "change" }],
-        courseId: [
-          { required: true, message: "请选择课程", trigger: "change" },
-        ],
-        classRoomId: [
-          { required: true, message: "请选择课室", trigger: "change" },
-        ],
         grade: [{ required: true, message: "请选择年级", trigger: "change" }],
         createDate: [{ required: false, message: "", trigger: "blur" }],
         editDate: [{ required: false, message: "", trigger: "blur" }],
@@ -384,30 +232,13 @@ export default {
     for (let i in params) {
       this.params[i] = params[i];
     }
-    this.getDetail();
     this.getSchoolList();
   },
   methods: {
-    // 通过id获取college
-    getDetail() {
-      if (this.params.id && this.params.id != null) {
-        api.getDetail(this.params.id).then((res) => {
-          if (res.data.code == 10000) {
-            this.data = res.data.data;
-            return;
-          }
-          this.$message.error(res.data.msg);
-        });
-        return;
-      }
-    },
-    // 获取school classroom list
+    // 获取school list
     getSchoolList() {
       api.getSchoolList().then((res) => {
         this.schooldata = res.data.data;
-      });
-      api.getClassRoomList().then((res) => {
-        this.classroomdata = res.data.data;
       });
     },
     submitForm(formName) {
@@ -457,10 +288,6 @@ export default {
         api.getSpecialityList({ collegeId: res }).then((res) => {
           this.specialitydata = res.data.data;
         });
-        // 获取教师
-        api.getTeacherList({ collegeId: res }).then((res) => {
-          this.teacherdata = res.data.data;
-        });
       }
     },
     // 选择专业后
@@ -469,13 +296,8 @@ export default {
         this.commData.specialityName = this.specialitydata.find(
           (it) => it.id == res
         ).name;
-      // 获取班级
       api.getClassList({ specialityId: res }).then((res) => {
         this.classdata = res.data.data;
-      });
-      // 获取课程
-      api.getCourseList({ specialityId: res }).then((res) => {
-        this.coursedata = res.data.data;
       });
     },
     // 选择班级后
@@ -485,40 +307,19 @@ export default {
           (it) => it.id == res
         ).name;
       }
-    },
-    // 选择课程后
-    handleCourse(res) {
-      if (res)
-        this.commData.courseName = this.coursedata.find(
-          (it) => it.id == res
-        ).name;
-    },
-    // 选择教师后
-    handleTeacher(res) {
-      if (res)
-        this.commData.teacherName = this.teacherdata.find(
-          (it) => it.id == res
-        ).name;
-    },
-    // 选择课室后
-    handleClassRoom(res) {
-      if (res) {
-        this.commData.classRoomName = this.classroomdata.find(
-          (it) => it.id == res
-        ).name;
-        this.commData.areaId = this.classroomdata.find(
-          (it) => it.id == res
-        ).areaId;
-        this.commData.areaName = this.classroomdata.find(
-          (it) => it.id == res
-        ).areaName;
-      }
-    },
-    // 选择年级后
-    handleGrade() {
       for (let i in this.commData) {
         this.data[0][i] = this.commData[i];
       }
+      api.getStudentList({ classId: res }).then((res) => {
+        this.studentdata = res.data.data;
+      });
+    },
+    // 选择学生后
+    handleStudent(item) {
+      item.studentName = this.studentdata.find(
+        (it) => it.id == item.studentId
+      ).name;
+      item.grade = this.studentdata.find((it) => it.id == item.studentId).grade;
     },
     // 重置表单
     resetForm(formName) {
@@ -541,23 +342,13 @@ export default {
     // 增加data条数
     addDataItem() {
       const item = {
-        specialityId: "",
-        specialityName: "",
-        teacherId: "",
-        teacherName: "",
+        studentId: "",
+        studentName: "",
         classId: "",
         className: "",
-        courseId: "",
-        courseName: "",
-        classRoomId: "",
-        classRoomName: "",
-        areaName: "",
+        reason: "",
+        content: "",
         grade: "",
-        startClassDate: "",
-        endClassDate: "",
-        createDate: "",
-        editDate: "",
-        isDelete: "N",
       };
       for (let i in this.commData) {
         if (this.commData[i] === "") {
@@ -574,6 +365,7 @@ export default {
         return; // 默认第一项不删除
       }
       // 通过下标来删除指定条项
+      this.number--;
       this.data.splice(
         this.data.findIndex((it) => it === res),
         1

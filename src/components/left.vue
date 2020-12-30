@@ -23,19 +23,28 @@ export default {
     return {
       userdata: {
         avatar: "../../static/img/2023.jpg",
-        name: "管理员",
+        name: "",
       },
     };
   },
+  created() {
+    this.userdata.name =
+      sessionStorage.getItem("teacherName") == "null"
+        ? "管理员"
+        : sessionStorage.getItem("teacherName");
+  },
   methods: {
+    // 获取教师信息
+    getTeacher() {},
     myOperation(res) {
       switch (res) {
         case "myMsg":
           break;
         case "outLogin":
           sessionStorage.clear();
-          this.$store.commit('resetState');
+          this.$store.commit("resetState");
           this.$router.replace({ path: "/" });
+          location.reload();
           break;
         default:
           break;

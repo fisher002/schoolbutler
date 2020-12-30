@@ -26,7 +26,7 @@
           <div class="form_input_item">
             <el-input
               class="input_pad"
-              placeholder="请输入账号"
+              :placeholder="loginType === 'admin' ? '请输入账号' : '请输入工号'"
               v-model="userData.username"
               clearable
             >
@@ -95,14 +95,27 @@ export default {
       }, 6000);
     },
     checkInput() {
+      let datas = { teacherId: "", password: "" };
       if (this.userData.username === "" || this.userData.password === "") {
         return this.$message.error("账号或密码不能为空");
       }
-      api.checkLogin(this.userData, this.loginType).then(
+      if (this.loginType === "teacher") {
+        datas.teacherId = this.userData.username;
+        datas.password = this.userData.password;
+      }
+      api.checkLogin(this.loginType === "admin" ? this.userData : datas,this.loginType).then(
         (res) => {
           if (res.data.code == 10000) {
             this.setToken(res.data.data.token);
             sessionStorage.setItem("user_type", this.loginType);
+            sessionStorage.setItem(
+              "teacherId",
+              res.data.data.teacherId || null
+            );
+            sessionStorage.setItem(
+              "teacherName",
+              res.data.data.teacherName || null
+            );
             this.$router.replace({
               path: "/index",
             });
@@ -121,7 +134,7 @@ export default {
     setToken(token) {
       this.$store.commit("setToken", token);
       sessionStorage.setItem("token", this.$store.getters.getToken);
-      sessionStorage.setItem("isLogin",true);
+      sessionStorage.setItem("isLogin", true);
     },
   },
 };

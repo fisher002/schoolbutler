@@ -1,6 +1,6 @@
 import axios from '@/axios/axios'
 const baseUrl = '/api'
-const url = '/ac/studentclass'
+const url = '/ac/area'
 
 export default {
   getList(param) {
@@ -12,6 +12,13 @@ export default {
       }
     })
   },
+  getPageList(param) {
+    return axios({
+      url: `${baseUrl}${url}/page`,
+      method: 'get',
+      params: param
+    })
+  },
   getDetail(param) {
     return axios({
       url: `${baseUrl}${url}/${param}`,
@@ -20,7 +27,7 @@ export default {
   },
   update(param, type) {
     return axios({
-      url: type === 'add' ? `${baseUrl}${url}/add` : `${baseUrl}${url}/edit`,
+      url: type === 'add' ? `${baseUrl}${url}/listadd` : `${baseUrl}${url}/edit`,
       method: 'post',
       data: param
     })
@@ -38,26 +45,5 @@ export default {
       method: 'post',
       data: {}
     })
-  },
-  getCollegeList(param) {
-    return axios({
-      url: `${baseUrl}/ac/college/list`,
-      method: 'post',
-      data: param
-    })
-  },
-  getSpecialityList(param) {
-    return axios({
-      url: `${baseUrl}/ac/speciality/list`,
-      method: 'post',
-      data: param
-    })
-  },
-  getTeacherList(param) {
-    return axios({
-      url: `${baseUrl}/ac/teacher/list`,
-      method: 'post',
-      data: param
-    })
-  },
+  }
 }

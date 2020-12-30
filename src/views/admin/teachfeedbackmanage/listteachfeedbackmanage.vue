@@ -4,8 +4,14 @@
       <div class="box-top">
         <div class="top-left">
           <el-input
-            placeholder="请输入场地名称"
-            v-model="params.areaName"
+            placeholder="请输入班级名称"
+            v-model="params.className"
+            clearable
+          ></el-input>
+          <div style="width: 10px"></div>
+          <el-input
+            placeholder="请输入学生名"
+            v-model="params.name"
             clearable
           ></el-input>
           <div style="width: 10px"></div>
@@ -34,6 +40,7 @@
             type="primary"
             icon="el-icon-circle-plus-outline"
             @click="toDetail(null, 'add')"
+            disabled
             >新增</el-button
           >
         </div>
@@ -61,26 +68,48 @@
             width="50"
           ></el-table-column>
           <el-table-column
-            prop="name"
+            prop="studentName"
             align="center"
             sortable
-            label="教室名称"
+            label="学生"
             width="100"
           ></el-table-column>
           <el-table-column
-            prop="schoolName"
+            prop="className"
             align="center"
             sortable
-            label="校区"
+            label="班级"
             width="200"
           ></el-table-column>
           <el-table-column
-            prop="areaName"
+            prop="grade"
             align="center"
             sortable
-            label="场地"
+            label="年级"
+            width="100"
+          >
+            <template slot-scope="scope">
+              <span>{{ formatGrade(scope.row.grade) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="title"
+            align="center"
+            sortable
+            label="反馈标题"
             width="200"
           ></el-table-column>
+          <el-table-column
+            prop="content"
+            align="center"
+            sortable
+            label="反馈详情"
+            width="350"
+          >
+            <template slot-scope="scope">
+              <span>{{ `${scope.row.content.substr(0, 30)}...` }}</span>
+            </template>
+          </el-table-column>
           <el-table-column
             prop="editDate"
             align="center"
@@ -143,7 +172,7 @@
   </div>
 </template>
 <script>
-import api from "./classroommanageUrl";
+import api from "./teachfeedbackUrl";
 import comm from "@/util/util";
 export default {
   components: {},
@@ -155,7 +184,10 @@ export default {
       selectionData: "",
       params: {
         name: "",
-        areaName: "",
+        classId: "",
+        className: "",
+        studentName: "",
+        studentId: "",
         pageNum: 1,
         pageSize: 10,
         isDesc: "",
@@ -194,7 +226,7 @@ export default {
     },
     toDetail(res, type) {
       this.$router.push({
-        path: "/admin/detailclassroommanage",
+        path: "/admin/detailteachfeedbackmanage",
         query: {
           id: res,
           type: type,
@@ -203,18 +235,7 @@ export default {
     },
     // 删除
     toDelete(res) {
-      // let ids = [];
-      // ids.push(res);
       this.submitDel(res);
-    },
-    handleDelete() {
-      // if (this.selectionData.length > 0) {
-      //   let ids = [];
-      //   this.selectionData.forEach((e) => {
-      //     ids.push(e.id);
-      //   });
-      //   this.submitDel(ids);
-      // }
     },
     // 确认删除
     submitDel(res) {
@@ -243,6 +264,15 @@ export default {
             message: "已取消删除",
           });
         });
+    },
+    handleDelete() {
+      // if (this.selectionData.length > 0) {
+      //   let ids = [];
+      //   this.selectionData.forEach((e) => {
+      //     ids.push(e.id);
+      //   });
+      //   this.submitDel(ids);
+      // }
     },
     // 页码改变
     pageNumChange(res) {

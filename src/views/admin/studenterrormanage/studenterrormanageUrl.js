@@ -1,8 +1,15 @@
 import axios from '@/axios/axios'
 const baseUrl = '/api'
-const url = '/ac/studentclass'
+const url = '/ac/studenterror'
 
 export default {
+  getPageList(param) {
+    return axios({
+      url: `${baseUrl}${url}/page`,
+      method: 'get',
+      params: param
+    })
+  },
   getList(param) {
     return axios({
       url: `${baseUrl}${url}/list`,
@@ -20,7 +27,7 @@ export default {
   },
   update(param, type) {
     return axios({
-      url: type === 'add' ? `${baseUrl}${url}/add` : `${baseUrl}${url}/edit`,
+      url: type === 'add' ? `${baseUrl}${url}/listadd` : `${baseUrl}${url}/edit`,
       method: 'post',
       data: param
     })
@@ -53,9 +60,16 @@ export default {
       data: param
     })
   },
-  getTeacherList(param) {
+  getClassList(param) {
     return axios({
-      url: `${baseUrl}/ac/teacher/list`,
+      url: `${baseUrl}/ac/studentclass/list`,
+      method: 'post',
+      data: param
+    })
+  },
+  getStudentList(param) {
+    return axios({
+      url: `${baseUrl}/ac/student/list`,
       method: 'post',
       data: param
     })
